@@ -1,1078 +1,5905 @@
-from pathlib import Path
-
-p = Path("/mnt/data/DEEPCORE_1000_PLUS.html")
-
-# Build a genuinely large single-file game. The sections are deliberately separated
-# so the user can later edit systems without needing a backend.
-html = r'''<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#070a0f">
 <title>DEEPCORE — Mining Empire</title>
 <style>
-:root{
- --bg:#070a0f;--bg2:#0a1017;--panel:#0e141c;--panel2:#111a24;
- --line:#263544;--line2:#34485a;--text:#edf3f8;--muted:#8291a3;
- --gold:#e5ad4d;--gold2:#ffd978;--green:#61d39a;--red:#ed7272;
- --blue:#72a8ff;--purple:#a887ff;--cyan:#62dce7;
+
+:root {
+  --bg: #05080c;
+  --panel: #0d141c;
+  --panel2: #111b25;
+  --panel3: #162331;
+  --border: #273848;
+  --border2: #385064;
+  --text: #eef4f8;
+  --muted: #8fa1b2;
+  --gold: #e5ad4d;
+  --gold2: #ffd77c;
+  --green: #62c28a;
+  --red: #e46d6d;
+  --blue: #67a9e8;
+  --purple: #aa7bea;
+  --cyan: #5bd4dc;
+  --shadow: rgba(0,0,0,.42);
 }
-*{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{
- margin:0;background:radial-gradient(circle at 50% -10%,#172435 0,#070a0f 38%);
- color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Arial,sans-serif;
- min-height:100vh
+* {
+  box-sizing: border-box;
 }
-button,input,select,textarea{font:inherit}
-button{cursor:pointer}
-button:disabled{cursor:not-allowed}
-.hidden{display:none!important}
-.screen{min-height:100vh}
-.small{font-size:12px;color:var(--muted)}
-.muted{color:var(--muted)}
-hr{border:0;border-top:1px solid var(--line);margin:18px 0}
-h1,h2,h3,h4{margin-top:0}
-.auth{
- display:grid;place-items:center;padding:24px;
- background:
- radial-gradient(circle at 20% 10%,#253b51 0,transparent 30%),
- radial-gradient(circle at 80% 90%,#2c2110 0,transparent 25%)
+html {
+  min-height: 100%;
 }
-.auth-box{
- width:min(470px,95vw);padding:32px;background:#0d141cf5;
- border:1px solid var(--line);border-radius:24px;
- box-shadow:0 35px 120px #000b
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 20% 10%, rgba(54,91,124,.20), transparent 32%),
+    radial-gradient(circle at 80% 80%, rgba(128,73,31,.12), transparent 30%),
+    var(--bg);
+  color: var(--text);
+  font: 14px/1.45 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
 }
-.logo{
- font-size:44px;font-weight:1000;letter-spacing:7px;
- text-shadow:0 0 35px #e5ad4d44
+button,
+input,
+select {
+  font: inherit;
 }
-.tagline{line-height:1.55;color:#9aa9ba}
-.input{
- width:100%;padding:13px 14px;margin:6px 0;background:#080c12;
- color:#fff;border:1px solid #2a3948;border-radius:10px;outline:none
+button {
+  cursor: pointer;
 }
-.input:focus{border-color:#687d91;box-shadow:0 0 0 3px #ffffff08}
-.primary{
- width:100%;padding:13px;margin-top:8px;border:0;border-radius:10px;
- background:var(--gold);color:#15120b;font-weight:950
+button:disabled {
+  cursor: not-allowed;
 }
-.secondary{
- width:100%;padding:12px;margin-top:8px;border:1px solid var(--line2);
- border-radius:10px;background:#17222d;color:#edf3f8
+.hidden {
+  display: none !important;
 }
-.auth-msg{min-height:22px;color:var(--red);font-size:13px;margin-top:9px}
-.demo{
- margin-top:15px;padding:12px;border:1px solid #253342;border-radius:10px;
- background:#090e14;color:#8e9caf;font-size:12px
+.muted {
+  color: var(--muted);
 }
-.topbar{
- height:68px;position:sticky;top:0;z-index:50;display:flex;
- justify-content:space-between;align-items:center;padding:0 18px;
- background:#0a1017ee;border-bottom:1px solid var(--line);
- backdrop-filter:blur(12px)
+.small {
+  color: var(--muted);
+  font-size: 12px;
 }
-.brand{font-weight:1000;letter-spacing:4px}
-.top-actions{display:flex;align-items:center;gap:10px}
-.top-user{color:var(--muted);font-size:13px}
-.cash{color:var(--gold);font-size:20px;font-weight:950}
-.icon-btn,.btn{
- border:1px solid var(--line2);background:#17232f;color:#e9f0f5;
- border-radius:9px;padding:9px 12px
+.goldText {
+  color: var(--gold);
 }
-.icon-btn:hover,.btn:hover{background:#213140}
-.gold-btn{
- border:0;border-radius:9px;padding:11px 14px;background:var(--gold);
- color:#17130b;font-weight:950
+.greenText {
+  color: var(--green);
 }
-.danger{background:#4a2020!important;border-color:#6c3030!important}
-.app-layout{
- max-width:1500px;margin:auto;padding:18px;
- display:grid;grid-template-columns:220px minmax(0,1fr);gap:18px
+.redText {
+  color: var(--red);
 }
-.sidebar{
- height:max-content;position:sticky;top:86px;background:var(--panel);
- border:1px solid var(--line);border-radius:16px;padding:9px
+.blueText {
+  color: var(--blue);
 }
-.nav{
- width:100%;display:flex;align-items:center;gap:9px;margin:3px 0;
- text-align:left;border:1px solid transparent;background:#111a23;color:#e5edf3;
- border-radius:9px;padding:10px
+.purpleText {
+  color: var(--purple);
 }
-.nav:hover{background:#1a2835}
-.nav.active{background:#202f3d;border-color:#52687c}
-.nav-badge{margin-left:auto;font-size:10px;color:var(--gold)}
-.main{min-width:0}
-.page{display:none;animation:fade .16s ease}
-.page.active{display:block}
-@keyframes fade{from{opacity:.5;transform:translateY(3px)}to{opacity:1;transform:none}}
-.grid-2{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(300px,.75fr);gap:18px}
-.grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
-.card{
- background:linear-gradient(145deg,#0e141c,#0c1219);
- border:1px solid var(--line);border-radius:16px;padding:18px;
- box-shadow:0 10px 40px #0003
+.cyanText {
+  color: var(--cyan);
 }
-.card-title{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.badge{
- display:inline-flex;align-items:center;gap:5px;padding:5px 8px;border-radius:99px;
- background:#182430;border:1px solid #2d4051;color:#b9c7d4;font-size:11px
+.auth {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 22px;
+  background:
+    radial-gradient(circle at center, #1b2c3e 0%, #0a1119 45%, #05080c 75%);
 }
-.badge.gold{color:var(--gold);border-color:#604c28;background:#2a2113}
-.badge.green{color:var(--green);border-color:#315d49;background:#10231b}
-.badge.blue{color:var(--blue);border-color:#334e73;background:#101d30}
-.mine-view{
- height:370px;border-radius:15px;position:relative;overflow:hidden;
- display:grid;place-items:center;
- background:
- radial-gradient(circle at 50% 42%,#656a6d 0,#3b4247 25%,#1b2228 55%,#070a0d 80%);
- box-shadow:inset 0 0 120px #000,0 20px 50px #0007
+.authBox {
+  width: min(460px, 94vw);
+  padding: 32px;
+  background: rgba(13,20,28,.96);
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  box-shadow: 0 30px 90px var(--shadow);
 }
-.mine-view.deep-1{background:radial-gradient(circle,#596066,#30383f 34%,#0a0d11 78%)}
-.mine-view.deep-2{background:radial-gradient(circle,#4e5560,#242b34 38%,#070a0f 80%)}
-.mine-view.deep-3{background:radial-gradient(circle,#644a3b,#2a1a15 38%,#070809 80%)}
-.mine-view.deep-4{background:radial-gradient(circle,#52647a,#263b51 38%,#070a0f 80%)}
-.mine-view.deep-5{background:radial-gradient(circle,#57476e,#271e39 38%,#06080c 80%)}
-.rock{
- width:310px;height:240px;border-radius:51% 45% 57% 43%;
- background:linear-gradient(135deg,#92979b,#4a5157 52%,#181c21);
- box-shadow:inset -35px -40px 65px #000b,0 30px 60px #000;
- transform:rotate(-6deg);position:relative
+.logo {
+  font-size: 44px;
+  font-weight: 950;
+  letter-spacing: 7px;
 }
-.rock:before,.rock:after{
- content:"";position:absolute;border-radius:50%;background:#151a1e;
- box-shadow:40px 20px 0 #222a30, -55px 70px 0 #252b30, 80px 95px 0 #171c21
+.logoSub {
+  margin: 7px 0 22px;
+  color: var(--muted);
 }
-.rock:before{width:18px;height:18px;left:70px;top:75px}
-.rock:after{width:10px;height:10px;right:65px;top:50px}
-.pick{
- position:absolute;font-size:78px;user-select:none;filter:drop-shadow(8px 12px 5px #000);
- transition:.07s
+.input {
+  width: 100%;
+  padding: 13px 14px;
+  margin: 6px 0;
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  background: #080d13;
+  color: var(--text);
+  outline: none;
 }
-.pick.hit{transform:translate(20px,18px) rotate(-62deg) scale(1.08)}
-.particle{
- position:absolute;width:7px;height:7px;border-radius:50%;
- background:#d8a34c;pointer-events:none;animation:particle .7s forwards
+.input:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(229,173,77,.10);
 }
-@keyframes particle{to{transform:translate(var(--x),var(--y)) scale(.1);opacity:0}}
-.float{
- position:absolute;color:var(--gold);font-weight:1000;pointer-events:none;
- animation:float .8s forwards;text-shadow:0 2px 5px #000
+.goldButton {
+  width: 100%;
+  margin-top: 8px;
+  padding: 13px 15px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--gold);
+  color: #111;
+  font-weight: 950;
 }
-@keyframes float{to{transform:translateY(-70px);opacity:0}}
-.stats-grid{
- display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin-top:12px
+.darkButton {
+  padding: 11px 14px;
+  border: 1px solid var(--border2);
+  border-radius: 9px;
+  background: #172431;
+  color: var(--text);
 }
-.stat{
- background:#080d13;border:1px solid #1c2834;border-radius:10px;padding:11px
+.darkButton:hover {
+  background: #1c2c3b;
 }
-.stat-label{font-size:11px;color:var(--muted)}
-.stat-value{font-size:21px;font-weight:950;margin-top:3px}
-.action-row{display:flex;gap:9px;margin-top:11px}
-.action-main{
- flex:1;padding:16px;border:0;border-radius:11px;background:var(--gold);
- color:#15120b;font-weight:1000;font-size:17px
+.goldButton:hover {
+  background: var(--gold2);
 }
-.action-secondary{
- padding:16px 19px;border:1px solid var(--line2);border-radius:11px;
- background:#192631;color:#fff;font-weight:900
+.authMessage {
+  min-height: 24px;
+  margin: 12px 0 0;
+  color: var(--gold);
 }
-.progress{
- height:9px;background:#070b10;border-radius:99px;overflow:hidden;
- border:1px solid #16202a
+.sessionNotice {
+  margin-top: 18px;
+  padding: 11px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #090f15;
+  color: var(--muted);
+  font-size: 12px;
 }
-.progress i{display:block;height:100%;width:0;background:var(--gold);transition:.2s}
-.progress.blue i{background:var(--blue)}
-.progress.green i{background:var(--green)}
-.log{
- height:150px;overflow:auto;background:#070b10;border:1px solid #17222d;
- border-radius:10px;padding:8px;color:#8190a1;font-size:12px
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  height: 66px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 0 18px;
+  background: rgba(8,13,19,.94);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(12px);
 }
-.log div{padding:5px;border-bottom:1px solid #121a22}
-.upgrade-list,.setting-list,.mission-list,.achievement-list,.zone-list{display:grid;gap:9px}
-.upgrade{
- display:flex;align-items:center;justify-content:space-between;gap:12px;
- padding:14px;background:#090e14;border:1px solid #222f3c;border-radius:11px
+.brand {
+  font-weight: 950;
+  letter-spacing: 3px;
+  white-space: nowrap;
 }
-.upgrade:hover{border-color:#3a4d5f}
-.upgrade-name{font-weight:900}
-.upgrade-desc{font-size:12px;color:var(--muted);margin-top:3px}
-.level{color:var(--gold);font-size:11px}
-.buy{
- padding:9px 12px;border:1px solid #3b4f61;border-radius:9px;
- background:#22313f;color:#fff;font-weight:850;white-space:nowrap
+.topRight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
-.buy:disabled{opacity:.35}
-.kpi-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
-.kpi{
- background:#090e14;border:1px solid #202d39;border-radius:11px;padding:14px
+.cashTop {
+  color: var(--gold);
+  font-size: 19px;
+  font-weight: 950;
 }
-.kpi span{font-size:11px;color:var(--muted)}
-.kpi b{display:block;font-size:23px;margin-top:5px}
-.zone{
- padding:15px;background:#090e14;border:1px solid #23313e;border-radius:11px;
- display:flex;justify-content:space-between;gap:12px;align-items:center
+.layout {
+  width: min(1500px, 100%);
+  margin: 0 auto;
+  padding: 18px;
+  display: grid;
+  grid-template-columns: 218px 1fr;
+  gap: 18px;
 }
-.zone.locked{opacity:.42}
-.zone.current{border-color:#80612d;box-shadow:0 0 0 1px #e5ad4d22 inset}
-.zone-title{font-weight:900}
-.mission,.achievement,.contract{
- padding:14px;background:#090e14;border:1px solid #23313e;border-radius:11px
+.sidebar {
+  height: max-content;
+  position: sticky;
+  top: 84px;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 15px;
+  background: var(--panel);
 }
-.done{border-color:#41634f;background:#0d1b15}
-.right{float:right;color:var(--gold)}
-.market-big{font-size:48px;font-weight:1000;color:var(--gold)}
-.ore-table{width:100%;border-collapse:collapse}
-.ore-table th,.ore-table td{text-align:left;padding:10px;border-bottom:1px solid #1d2935}
-.ore-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:7px;background:#999}
-.toggle{
- width:50px;height:27px;border:0;border-radius:99px;background:#293743;
- position:relative
+.navButton {
+  width: 100%;
+  margin: 3px 0;
+  padding: 10px 11px;
+  text-align: left;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: #111a24;
+  color: var(--text);
 }
-.toggle i{
- position:absolute;width:21px;height:21px;top:3px;left:4px;border-radius:50%;
- background:#fff;transition:.18s
+.navButton:hover {
+  background: #172432;
 }
-.toggle.on{background:#3d805e}
-.toggle.on i{left:25px}
-.modal{
- position:fixed;inset:0;z-index:100;background:#000b;display:grid;place-items:center;
- padding:20px
+.navButton.active {
+  border-color: var(--gold);
+  background: #1b2632;
 }
-.modal-box{
- width:min(520px,95vw);background:#111923;border:1px solid #314353;
- border-radius:17px;padding:22px;box-shadow:0 30px 100px #000
+.page {
+  display: none;
 }
-.modal textarea{width:100%;min-height:170px;background:#080c12;color:#fff;border:1px solid #2a3948;border-radius:9px;padding:10px}
-.toast{
- position:fixed;right:18px;bottom:18px;z-index:200;background:var(--gold);
- color:#15120b;font-weight:950;padding:12px 15px;border-radius:10px;
- display:none;box-shadow:0 10px 30px #000
+.page.active {
+  display: block;
 }
-.tooltip{
- position:fixed;z-index:300;display:none;padding:7px 9px;background:#05080c;
- border:1px solid #334455;border-radius:7px;color:#d8e1e8;font-size:12px;pointer-events:none
+.grid2 {
+  display: grid;
+  grid-template-columns: minmax(0,1.25fr) minmax(300px,.75fr);
+  gap: 18px;
 }
-@media(max-width:1000px){
- .app-layout{grid-template-columns:1fr}
- .sidebar{position:static;display:flex;overflow:auto;gap:4px}
- .nav{min-width:125px}
- .grid-2{grid-template-columns:1fr}
+.grid3 {
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 10px;
 }
-@media(max-width:650px){
- .topbar{padding:0 10px}.top-user{display:none}
- .stats-grid{grid-template-columns:1fr 1fr}
- .kpi-grid{grid-template-columns:1fr 1fr}
- .mine-view{height:270px}.rock{width:230px;height:180px}.pick{font-size:62px}
- .action-row{flex-direction:column}.action-secondary{width:100%}
- .logo{font-size:34px}
+.grid4 {
+  display: grid;
+  grid-template-columns: repeat(4,1fr);
+  gap: 10px;
 }
+.card {
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 15px;
+  background: var(--panel);
+  box-shadow: 0 16px 35px rgba(0,0,0,.12);
+}
+.card + .card {
+  margin-top: 18px;
+}
+.card h2 {
+  margin: 0 0 14px;
+}
+.card h3 {
+  margin-top: 0;
+}
+.divider {
+  height: 1px;
+  margin: 17px 0;
+  background: var(--border);
+}
+.mineView {
+  height: 340px;
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at 50% 45%, #63686c 0%, #3a4147 35%, #171c21 67%, #070a0e 100%);
+}
+.mineGlow {
+  position: absolute;
+  width: 430px;
+  height: 430px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(229,173,77,.13), transparent 64%);
+}
+.rock {
+  width: 285px;
+  height: 220px;
+  border-radius: 48% 52% 47% 53%;
+  transform: rotate(-8deg);
+  background: linear-gradient(145deg, #8b9196, #41484f 54%, #171b20);
+  box-shadow:
+    inset -30px -35px 55px rgba(0,0,0,.78),
+    inset 18px 10px 28px rgba(255,255,255,.12),
+    0 30px 55px rgba(0,0,0,.55);
+}
+.pickaxe {
+  position: absolute;
+  font-size: 74px;
+  filter: drop-shadow(9px 11px 6px rgba(0,0,0,.7));
+  transition: transform .08s ease;
+}
+.pickaxe.hit {
+  transform: translate(22px, 22px) rotate(-62deg);
+}
+.mineFlash {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--gold2);
+  box-shadow: 0 0 22px 9px rgba(255,215,124,.7);
+  animation: flash .35s ease-out forwards;
+  pointer-events: none;
+}
+@keyframes flash {
+  from {
+    transform: scale(.5);
+    opacity: 1;
+  }
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+.floatText {
+  position: absolute;
+  color: var(--gold2);
+  font-weight: 950;
+  pointer-events: none;
+  animation: floatUp .9s ease-out forwards;
+  text-shadow: 0 2px 6px #000;
+}
+@keyframes floatUp {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-70px);
+    opacity: 0;
+  }
+}
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4,1fr);
+  gap: 8px;
+  margin-top: 10px;
+}
+.stat {
+  padding: 11px;
+  border-radius: 9px;
+  background: #090e14;
+}
+.statValue {
+  margin-top: 2px;
+  font-size: 20px;
+  font-weight: 950;
+}
+.actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+.mineButton {
+  flex: 1;
+}
+.bar {
+  height: 9px;
+  overflow: hidden;
+  border-radius: 20px;
+  background: #080c11;
+}
+.bar i {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--gold);
+  transition: width .2s ease;
+}
+.panelRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.kpi {
+  min-height: 84px;
+  padding: 13px;
+  border-radius: 10px;
+  background: #090e14;
+}
+.kpi b {
+  display: block;
+  margin-top: 3px;
+  font-size: 21px;
+}
+.itemList {
+  display: grid;
+  gap: 9px;
+}
+.item {
+  padding: 13px;
+  border: 1px solid #22303d;
+  border-radius: 10px;
+  background: #090e14;
+}
+.item:hover {
+  border-color: #3a4d60;
+}
+.itemTitle {
+  font-weight: 900;
+}
+.itemDesc {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.itemActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 7px;
+  margin-top: 8px;
+}
+.buyButton {
+  padding: 8px 11px;
+  border: 1px solid #3a4d60;
+  border-radius: 8px;
+  background: #263746;
+  color: white;
+}
+.buyButton:disabled {
+  opacity: .35;
+}
+.progressText {
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.log {
+  height: 160px;
+  overflow: auto;
+  padding: 8px;
+  border-radius: 9px;
+  background: #080c11;
+  color: #8291a2;
+  font-size: 12px;
+}
+.badge {
+  display: inline-block;
+  padding: 3px 7px;
+  border: 1px solid var(--border2);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 11px;
+}
+.badge.done {
+  border-color: #4c765f;
+  color: var(--green);
+}
+.rare {
+  border-color: #775ba8;
+}
+.marketNumber {
+  margin: 8px 0;
+  font-size: 48px;
+  font-weight: 950;
+}
+.toast {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 100;
+  display: none;
+  max-width: min(420px,90vw);
+  padding: 12px 15px;
+  border-radius: 9px;
+  background: var(--gold);
+  color: #111;
+  font-weight: 950;
+  box-shadow: 0 14px 35px rgba(0,0,0,.35);
+}
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: none;
+  place-items: center;
+  padding: 18px;
+  background: rgba(0,0,0,.68);
+}
+.modal.open {
+  display: grid;
+}
+.modalBox {
+  width: min(600px,96vw);
+  max-height: 90vh;
+  overflow: auto;
+  padding: 20px;
+  border: 1px solid var(--border2);
+  border-radius: 15px;
+  background: #0c131b;
+}
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.table th,
+.table td {
+  padding: 9px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+.notice {
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #090e14;
+}
+.danger {
+  border-color: #673b3b;
+}
+.success {
+  border-color: #376b4d;
+}
+.warn {
+  border-color: #745f31;
+}
+.toggle {
+  min-width: 75px;
+}
+.miniGrid {
+  display: grid;
+  grid-template-columns: repeat(2,1fr);
+  gap: 9px;
+}
+@media(max-width:1000px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+  .sidebar {
+    position: static;
+    display: flex;
+    overflow-x: auto;
+    gap: 4px;
+  }
+  .navButton {
+    min-width: 115px;
+  }
+  .grid2 {
+    grid-template-columns: 1fr;
+  }
+}
+@media(max-width:700px) {
+  .topbar {
+    height: auto;
+    min-height: 66px;
+    flex-wrap: wrap;
+    padding: 10px 12px;
+  }
+  .layout {
+    padding: 10px;
+  }
+  .stats,
+  .grid4 {
+    grid-template-columns: 1fr 1fr;
+  }
+  .grid3 {
+    grid-template-columns: 1fr 1fr;
+  }
+  .mineView {
+    height: 260px;
+  }
+  .rock {
+    width: 235px;
+    height: 180px;
+  }
+  .logo {
+    font-size: 36px;
+  }
+}
+
 </style>
 </head>
 <body>
 
-<section id="authScreen" class="screen auth">
- <div class="auth-box">
-  <div class="logo">DEEPCORE</div>
-  <p class="tagline">Build a mining empire from the surface to the Core. Mine, automate, upgrade, discover and go deeper.</p>
-  <input id="authUser" class="input" maxlength="24" placeholder="Username">
-  <input id="authPass" class="input" type="password" maxlength="80" placeholder="Password — 8+ characters">
-  <button id="loginBtn" class="primary">LOG IN</button>
-  <button id="createBtn" class="secondary">CREATE ACCOUNT</button>
-  <div id="authMsg" class="auth-msg"></div>
-  <div class="demo">
-   <b>Offline account system</b><br>
-   Your account and progression are stored locally in this browser. No email, backend or paid service is required.
+<section id="auth" class="auth">
+  <div class="authBox">
+    <div class="logo">DEEPCORE</div>
+    <div class="logoSub">
+      Build a mining empire from the surface to the Core.
+    </div>
+    <input
+      id="usernameInput"
+      class="input"
+      autocomplete="username"
+      placeholder="Username"
+      maxlength="24"
+    >
+    <input
+      id="passwordInput"
+      class="input"
+      type="password"
+      autocomplete="current-password"
+      placeholder="Password (8+ characters)"
+    >
+    <button id="loginButton" class="goldButton">
+      LOG IN
+    </button>
+    <button id="createButton" class="darkButton goldButton">
+      CREATE ACCOUNT
+    </button>
+    <div id="authMessage" class="authMessage"></div>
+    <div class="sessionNotice">
+      This device keeps you signed in automatically for
+      <b>30 days</b>. You only return to the login screen
+      when that session expires or you log out.
+    </div>
   </div>
- </div>
 </section>
 
-<section id="gameScreen" class="hidden">
-<header class="topbar">
- <div class="brand">⛏ DEEPCORE</div>
- <div class="top-actions">
-  <span id="topUser" class="top-user"></span>
-  <span class="cash">$<span id="topCash">0</span></span>
-  <button id="logoutBtn" class="icon-btn">Log out</button>
- </div>
-</header>
+<section id="app" class="hidden">
+  <header class="topbar">
+    <div class="brand">⛏ DEEPCORE</div>
+    <div class="topRight">
+      <span id="who" class="muted"></span>
+      <span class="badge">
+        AUTO LOGIN:
+        <b id="sessionDays">30</b>d
+      </span>
+      <span class="cashTop">
+        $<span id="moneyTop">0</span>
+      </span>
+      <button id="logoutButton" class="darkButton">
+        LOG OUT
+      </button>
+    </div>
+  </header>
 
-<div class="app-layout">
-<aside class="sidebar">
- <button class="nav active" data-page="mine">⛏ <span>Mine</span></button>
- <button class="nav" data-page="upgrades">⚙ <span>Upgrades</span></button>
- <button class="nav" data-page="zones">🗺 <span>Zones</span></button>
- <button class="nav" data-page="market">📈 <span>Market</span></button>
- <button class="nav" data-page="contracts">📦 <span>Contracts</span></button>
- <button class="nav" data-page="missions">📋 <span>Missions</span></button>
- <button class="nav" data-page="research">🔬 <span>Research</span></button>
- <button class="nav" data-page="inventory">🎒 <span>Inventory</span></button>
- <button class="nav" data-page="stats">📊 <span>Stats</span></button>
- <button class="nav" data-page="achievements">🏆 <span>Achievements</span></button>
- <button class="nav" data-page="settings">⚙ <span>Settings</span></button>
-</aside>
+  <div class="layout">
+    <aside class="sidebar">
+      <button class="navButton active" data-page="mine">⛏ Mine</button>
+      <button class="navButton" data-page="upgrades">⚙ Upgrades</button>
+      <button class="navButton" data-page="zones">🗺 Zones</button>
+      <button class="navButton" data-page="market">📈 Market</button>
+      <button class="navButton" data-page="missions">📋 Missions</button>
+      <button class="navButton" data-page="equipment">🛠 Equipment</button>
+      <button class="navButton" data-page="research">🧪 Research</button>
+      <button class="navButton" data-page="drones">🤖 Drones</button>
+      <button class="navButton" data-page="inventory">📦 Inventory</button>
+      <button class="navButton" data-page="stats">📊 Stats</button>
+      <button class="navButton" data-page="achievements">🏆 Achievements</button>
+      <button class="navButton" data-page="contracts">📑 Contracts</button>
+      <button class="navButton" data-page="leaderboard">🥇 Local Leaderboard</button>
+      <button class="navButton" data-page="settings">⚙ Settings</button>
+    </aside>
 
-<main class="main">
+    <main>
+      <section id="mine" class="page active">
+        <div class="grid2">
+          <div class="card">
+            <div class="panelRow">
+              <div>
+                <h2>Active Mine</h2>
+                <div class="small">
+                  <span id="currentZone">Surface Mine</span>
+                  ·
+                  <span id="currentZoneMultiplier">1.00x</span>
+                </div>
+              </div>
+              <span class="badge">
+                DEPTH
+                <b id="depth">1</b>m
+              </span>
+            </div>
 
-<section id="page-mine" class="page active">
- <div class="grid-2">
-  <div class="card">
-   <div class="card-title">
-    <div><h2>Active Mine</h2><div class="small" id="zoneLabel">Surface Mine</div></div>
-    <span id="depthBadge" class="badge gold">DEPTH 1m</span>
-   </div>
-   <div id="mineView" class="mine-view deep-1">
-    <div class="rock"></div>
-    <div id="pick" class="pick">⛏️</div>
-   </div>
-   <div class="stats-grid">
-    <div class="stat"><div class="stat-label">CASH</div><div class="stat-value">$<span id="cash1">0</span></div></div>
-    <div class="stat"><div class="stat-label">ORE</div><div class="stat-value"><span id="ore1">0</span></div></div>
-    <div class="stat"><div class="stat-label">POWER</div><div class="stat-value"><span id="power1">1</span></div></div>
-    <div class="stat"><div class="stat-label">AUTO / SEC</div><div class="stat-value"><span id="auto1">0</span></div></div>
-   </div>
-   <div class="action-row">
-    <button id="mineBtn" class="action-main">⛏ MINE ROCK</button>
-    <button id="sellBtn" class="action-secondary">SELL ORE</button>
-   </div>
+            <div id="mineView" class="mineView">
+              <div class="mineGlow"></div>
+              <div class="rock"></div>
+              <div id="pickaxe" class="pickaxe">⛏️</div>
+            </div>
+
+            <div class="stats">
+              <div class="stat">
+                Cash
+                <div class="statValue">
+                  $<span id="cash">0</span>
+                </div>
+              </div>
+              <div class="stat">
+                Ore
+                <div class="statValue">
+                  <span id="ore">0</span>
+                </div>
+              </div>
+              <div class="stat">
+                Power
+                <div class="statValue">
+                  <span id="power">1</span>
+                </div>
+              </div>
+              <div class="stat">
+                Auto/sec
+                <div class="statValue">
+                  <span id="autoRate">0</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="actions">
+              <button id="mineButton" class="goldButton mineButton">
+                ⛏ MINE
+              </button>
+              <button id="sellButton" class="darkButton">
+                SELL
+              </button>
+            </div>
+
+            <div class="notice" style="margin-top:10px">
+              Press <b>SPACE</b> to mine.
+              Critical chance:
+              <b id="criticalChance">3.0%</b>
+              · Rare chance:
+              <b id="rareChance">2.0%</b>
+            </div>
+          </div>
+
+          <div class="card">
+            <h2>Depth Control</h2>
+            <div class="panelRow">
+              <b>Stored ore</b>
+              <b id="storage">0 / 500</b>
+            </div>
+            <div class="bar" style="margin-top:8px">
+              <i id="depthBar"></i>
+            </div>
+            <div class="progressText">
+              <span id="progress">0</span>
+              /
+              <span id="depthNeed">100</span>
+              ore required for the next meter
+            </div>
+            <button
+              id="descendButton"
+              class="darkButton"
+              style="width:100%;margin-top:10px"
+            >
+              DESCEND
+            </button>
+
+            <div class="divider"></div>
+
+            <h3>Offline Earnings</h3>
+            <div id="offlinePanel" class="notice">
+              Automation can keep generating while you are away.
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="miniGrid">
+              <div class="kpi">
+                Cash/sec
+                <b id="cashRate">$0</b>
+              </div>
+              <div class="kpi">
+                Prestige
+                <b id="prestigeBonus">0%</b>
+              </div>
+              <div class="kpi">
+                Drone slots
+                <b id="droneSlots">0</b>
+              </div>
+              <div class="kpi">
+                Streak
+                <b id="streakDisplay">0</b>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Activity</h3>
+          <div id="activityLog" class="log"></div>
+        </div>
+
+        <div class="grid3">
+          <div class="card">
+            <h3>Daily Reward</h3>
+            <div class="small">
+              Streak:
+              <b id="dailyStreak">0</b>
+            </div>
+            <div class="marketNumber" id="dailyReward">$500</div>
+            <button id="dailyButton" class="goldButton">
+              CLAIM DAILY REWARD
+            </button>
+          </div>
+
+          <div class="card">
+            <h3>Machine Profile</h3>
+            <div class="small">
+              Automatic production
+            </div>
+            <div class="marketNumber">
+              <span id="machineRate">0</span>
+            </div>
+            <div class="small">
+              ore/sec
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Event Feed</h3>
+            <div id="eventPanel" class="notice">
+              Random mining events can happen during active play.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="upgrades" class="page">
+        <div class="card">
+          <h2>Upgrades</h2>
+          <div id="upgradeList" class="itemList"></div>
+        </div>
+      </section>
+
+      <section id="zones" class="page">
+        <div class="card">
+          <h2>Mining Zones</h2>
+          <div id="zoneList" class="itemList"></div>
+        </div>
+      </section>
+
+      <section id="market" class="page">
+        <div class="grid2">
+          <div class="card">
+            <h2>Ore Market</h2>
+            <div class="marketNumber" id="marketValue">
+              1.00x
+            </div>
+            <div id="marketTrend" class="goldText">
+              MARKET NORMAL
+            </div>
+            <p class="muted">
+              Prices change every 30 seconds.
+              Market Office levels improve your floor.
+            </p>
+            <button
+              id="marketSellButton"
+              class="goldButton"
+            >
+              SELL ALL AT MARKET PRICE
+            </button>
+          </div>
+
+          <div class="card">
+            <h2>Market Metrics</h2>
+            <div class="kpi">
+              Current multiplier
+              <b id="marketValueText">1.00x</b>
+            </div>
+            <div class="kpi" style="margin-top:9px">
+              Machine income
+              <b id="marketIncome">$0/sec</b>
+            </div>
+            <div class="kpi" style="margin-top:9px">
+              Base ore value
+              <b id="marketOreValue">$1</b>
+            </div>
+            <div class="kpi" style="margin-top:9px">
+              Stored inventory value
+              <b id="marketInventoryValue">$0</b>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="missions" class="page">
+        <div class="card">
+          <h2>Missions</h2>
+          <div id="missionList" class="itemList"></div>
+        </div>
+      </section>
+
+      <section id="equipment" class="page">
+        <div class="card">
+          <h2>Equipment</h2>
+          <div id="equipmentList" class="itemList"></div>
+        </div>
+      </section>
+
+      <section id="research" class="page">
+        <div class="card">
+          <h2>Research Lab</h2>
+          <div id="researchList" class="itemList"></div>
+        </div>
+      </section>
+
+      <section id="drones" class="page">
+        <div class="card">
+          <h2>Drone Command</h2>
+          <div id="droneList" class="itemList"></div>
+        </div>
+      </section>
+
+      <section id="inventory" class="page">
+        <div class="card">
+          <h2>Inventory</h2>
+          <div style="overflow:auto">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Ore</th>
+                  <th>Amount</th>
+                  <th>Base Value</th>
+                  <th>Total</th>
+                  <th>Depth</th>
+                </tr>
+              </thead>
+              <tbody id="inventoryList"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="stats" class="page">
+        <div class="card">
+          <h2>Statistics</h2>
+          <div class="grid4">
+            <div class="kpi">
+              Lifetime cash
+              <b id="statLifetime">$0</b>
+            </div>
+            <div class="kpi">
+              Total ore
+              <b id="statOre">0</b>
+            </div>
+            <div class="kpi">
+              Hits
+              <b id="statHits">0</b>
+            </div>
+            <div class="kpi">
+              Rare finds
+              <b id="statRare">0</b>
+            </div>
+            <div class="kpi">
+              Deepest
+              <b id="statDepth">1m</b>
+            </div>
+            <div class="kpi">
+              Play time
+              <b id="statTime">0s</b>
+            </div>
+            <div class="kpi">
+              Contracts
+              <b id="statContracts">0</b>
+            </div>
+            <div class="kpi">
+              Crates
+              <b id="statCrates">0</b>
+            </div>
+            <div class="kpi">
+              Prestige
+              <b id="statPrestige">0</b>
+            </div>
+            <div class="kpi">
+              Critical hits
+              <b id="statCritical">0</b>
+            </div>
+            <div class="kpi">
+              Discoveries
+              <b id="statDiscoveries">0</b>
+            </div>
+            <div class="kpi">
+              Best streak
+              <b id="statBestStreak">0</b>
+            </div>
+            <div class="kpi">
+              Offline time
+              <b id="statOffline">0s</b>
+            </div>
+            <div class="kpi">
+              Upgrades bought
+              <b id="statUpgrades">0</b>
+            </div>
+            <div class="kpi">
+              Research bought
+              <b id="statResearch">0</b>
+            </div>
+            <div class="kpi">
+              Market sales
+              <b id="statMarket">0</b>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="achievements" class="page">
+        <div class="card">
+          <h2>Achievements</h2>
+          <div id="achievementList" class="itemList"></div>
+        </div>
+      </section>
+
+      <section id="contracts" class="page">
+        <div class="card">
+          <h2>Contracts</h2>
+          <div id="contractPanel"></div>
+        </div>
+      </section>
+
+      <section id="leaderboard" class="page">
+        <div class="card">
+          <h2>Local Leaderboard</h2>
+          <div class="notice">
+            This leaderboard only uses accounts stored in this
+            browser. It does not connect to a server.
+          </div>
+          <div style="overflow:auto;margin-top:12px">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Miner</th>
+                  <th>Lifetime</th>
+                  <th>Depth</th>
+                  <th>Prestige</th>
+                </tr>
+              </thead>
+              <tbody id="leaderboardList"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="settings" class="page">
+        <div class="grid2">
+          <div class="card">
+            <h2>Settings</h2>
+            <div class="itemList">
+              <div class="item">
+                <div class="panelRow">
+                  <b>Sound effects</b>
+                  <button id="soundButton" class="darkButton toggle">ON</button>
+                </div>
+              </div>
+              <div class="item">
+                <div class="panelRow">
+                  <b>Auto-save</b>
+                  <button id="autosaveButton" class="darkButton toggle">ON</button>
+                </div>
+              </div>
+              <div class="item">
+                <div class="panelRow">
+                  <b>Motion</b>
+                  <button id="motionButton" class="darkButton toggle">FULL</button>
+                </div>
+              </div>
+              <div class="item">
+                <div class="panelRow">
+                  <b>Reset confirmation</b>
+                  <button id="confirmButton" class="darkButton toggle">ON</button>
+                </div>
+              </div>
+              <div class="item">
+                <div class="panelRow">
+                  <b>Export save</b>
+                  <button id="exportButton" class="darkButton">EXPORT</button>
+                </div>
+              </div>
+              <div class="item">
+                <div class="panelRow">
+                  <b>Import save</b>
+                  <button id="importButton" class="darkButton">IMPORT</button>
+                </div>
+              </div>
+              <div class="item danger">
+                <div class="panelRow">
+                  <b>Reset progression</b>
+                  <button id="resetButton" class="darkButton">RESET</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h2>Prestige</h2>
+            <div class="notice">
+              Reach 500m and pay the prestige cost to restart
+              progression for a permanent production bonus.
+            </div>
+            <div class="marketNumber" id="prestigeCost">$10,000,000</div>
+            <button id="prestigeButton" class="goldButton">
+              PRESTIGE
+            </button>
+            <div class="divider"></div>
+            <div id="sessionInfo" class="notice">
+              Automatic login information.
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
   </div>
-
-  <div class="card">
-   <div class="card-title"><h2>Depth Control</h2><span id="depthStatus" class="badge">LOCKED</span></div>
-   <p class="muted">Collect enough ore to break through to the next depth.</p>
-   <div class="progress"><i id="depthProgress"></i></div>
-   <p class="small"><span id="depthOre">0</span> / <span id="depthNeed">100</span> ore</p>
-   <button id="descendBtn" class="btn" style="width:100%">DESCEND ONE LEVEL</button>
-   <hr>
-   <h3>Offline Earnings</h3>
-   <div id="offlineReport" class="muted">Your machines continue working while you are away.</div>
-   <hr>
-   <div class="small">Storage <b id="storageText">0 / 500</b></div>
-   <div class="progress blue" style="margin-top:7px"><i id="storageProgress"></i></div>
-   <div class="small" style="margin-top:10px">Estimated value/sec <b id="cashRate">$0</b></div>
-  </div>
- </div>
-
- <div class="card" style="margin-top:18px">
-  <div class="card-title"><h3>Mining Activity</h3><span id="streakBadge" class="badge">STREAK 0</span></div>
-  <div id="activityLog" class="log"></div>
- </div>
 </section>
 
-<section id="page-upgrades" class="page">
- <div class="card"><div class="card-title"><div><h2>Upgrade Workshop</h2><p class="muted">Turn a hole in the ground into an industrial operation.</p></div><span class="badge gold">10 SYSTEMS</span></div><div id="upgradeList" class="upgrade-list"></div></div>
-</section>
-
-<section id="page-zones" class="page">
- <div class="card"><h2>Mining Zones</h2><p class="muted">Every zone changes what you can discover.</p><div id="zoneList" class="zone-list"></div></div>
-</section>
-
-<section id="page-market" class="page">
- <div class="grid-2">
-  <div class="card"><span class="badge">LIVE MARKET</span><div id="marketMultiplier" class="market-big">1.00x</div><p id="marketState" class="muted">Stable market.</p><div class="progress"><i id="marketProgress"></i></div><p class="small">Market changes every 45 seconds.</p><button id="marketSellBtn" class="gold-btn" style="width:100%">SELL ALL AT MARKET PRICE</button></div>
-  <div class="card"><h2>Ore Prices</h2><table class="ore-table"><thead><tr><th>Ore</th><th>Base</th><th>Current</th></tr></thead><tbody id="orePrices"></tbody></table></div>
- </div>
-</section>
-
-<section id="page-contracts" class="page">
- <div class="card"><div class="card-title"><h2>Contracts</h2><button id="rerollContracts" class="btn">Reroll</button></div><p class="muted">Complete industrial contracts for large rewards.</p><div id="contractList" class="upgrade-list"></div></div>
-</section>
-
-<section id="page-missions" class="page">
- <div class="card"><h2>Missions</h2><p class="muted">Longer-term objectives with permanent rewards.</p><div id="missionList" class="mission-list"></div></div>
-</section>
-
-<section id="page-research" class="page">
- <div class="card"><h2>Research Laboratory</h2><p class="muted">Spend research points to unlock permanent efficiency bonuses.</p><div class="grid-3">
-  <div class="card"><h3>Mining Science</h3><p class="small">+5% manual power per level.</p><button class="buy" data-research="mining">Research</button></div>
-  <div class="card"><h3>Automation</h3><p class="small">+3% automated production per level.</p><button class="buy" data-research="automation">Research</button></div>
-  <div class="card"><h3>Geology</h3><p class="small">+1% rare chance per level.</p><button class="buy" data-research="geology">Research</button></div>
-  <div class="card"><h3>Logistics</h3><p class="small">+7% storage per level.</p><button class="buy" data-research="logistics">Research</button></div>
-  <div class="card"><h3>Refining</h3><p class="small">+4% ore value per level.</p><button class="buy" data-research="refining">Research</button></div>
-  <div class="card"><h3>Market Theory</h3><p class="small">Improves market floor.</p><button class="buy" data-research="market">Research</button></div>
- </div><hr><b>Research Points: <span id="researchPoints">0</span></b></div>
-</section>
-
-<section id="page-inventory" class="page">
- <div class="grid-2">
-  <div class="card"><h2>Ore Inventory</h2><table class="ore-table"><thead><tr><th>Ore</th><th>Owned</th><th>Value</th></tr></thead><tbody id="inventoryTable"></tbody></table></div>
-  <div class="card"><h2>Equipment</h2><div id="equipmentList" class="upgrade-list"></div></div>
- </div>
-</section>
-
-<section id="page-stats" class="page">
- <div class="card"><h2>Statistics</h2><div class="kpi-grid">
-  <div class="kpi"><span>LIFETIME CASH</span><b id="statCash">$0</b></div>
-  <div class="kpi"><span>TOTAL ORE</span><b id="statOre">0</b></div>
-  <div class="kpi"><span>MANUAL HITS</span><b id="statHits">0</b></div>
-  <div class="kpi"><span>RARE FINDS</span><b id="statRare">0</b></div>
-  <div class="kpi"><span>DEEPEST DEPTH</span><b id="statDepth">1m</b></div>
-  <div class="kpi"><span>PLAY TIME</span><b id="statTime">0m</b></div>
-  <div class="kpi"><span>CONTRACTS</span><b id="statContracts">0</b></div>
-  <div class="kpi"><span>CRATES</span><b id="statCrates">0</b></div>
-  <div class="kpi"><span>PRESTIGES</span><b id="statPrestige">0</b></div>
-  <div class="kpi"><span>CRITICAL HITS</span><b id="statCrits">0</b></div>
-  <div class="kpi"><span>EVENTS</span><b id="statEvents">0</b></div>
-  <div class="kpi"><span>RESEARCH</span><b id="statResearch">0</b></div>
- </div></div>
-</section>
-
-<section id="page-achievements" class="page">
- <div class="card"><h2>Achievements</h2><div id="achievementList" class="achievement-list"></div></div>
-</section>
-
-<section id="page-settings" class="page">
- <div class="card"><h2>Settings & Save Management</h2><div class="setting-list">
-  <div class="setting"><div><b>Sound Effects</b><div class="small">Mining and event sounds.</div></div><button id="soundToggle" class="toggle on"><i></i></button></div>
-  <div class="setting"><div><b>Auto Save</b><div class="small">Automatically save every few seconds.</div></div><button id="autoSaveToggle" class="toggle on"><i></i></button></div>
-  <div class="setting"><div><b>Reduced Effects</b><div class="small">Lower particle effects.</div></div><button id="effectsToggle" class="toggle"><i></i></button></div>
-  <div class="setting"><div><b>Export Save</b><div class="small">Download a backup of this account.</div></div><button id="exportBtn" class="btn">Export</button></div>
-  <div class="setting"><div><b>Import Save</b><div class="small">Restore a DEEPCORE backup.</div></div><button id="importBtn" class="btn">Import</button></div>
-  <div class="setting"><div><b>Prestige</b><div class="small">Reset normal progression for permanent prestige bonuses.</div></div><button id="prestigeBtn" class="btn">Prestige</button></div>
-  <div class="setting"><div><b>Reset Progression</b><div class="small">This permanently resets this local account.</div></div><button id="resetBtn" class="btn danger">Reset</button></div>
- </div></div>
-</section>
-
-</main>
-</div>
-</section>
-
-<div id="modal" class="modal hidden"><div class="modal-box"><h2 id="modalTitle">Save</h2><p id="modalText" class="muted"></p><textarea id="modalInput"></textarea><button id="modalOK" class="primary">Continue</button><button id="modalCancel" class="secondary">Cancel</button></div></div>
 <div id="toast" class="toast"></div>
-<div id="tooltip" class="tooltip"></div>
 
 <script>
+
 "use strict";
 
 /* =========================================================
-   DEEPCORE — LOCAL GAME ENGINE
-   One-file, offline-first mining game.
+   DEEPCORE
+   Single-file offline mining empire
    ========================================================= */
 
-const SAVE_KEY = "DEEPCORE_MASTER_SAVE_V7";
-const VERSION = 7;
-const MAX_OFFLINE_SECONDS = 7 * 24 * 60 * 60;
-const TICK_MS = 1000;
+/* -----------------------------
+   Storage keys
+   ----------------------------- */
+
+const DB_KEY = "DEEPCORE_DATABASE_V5";
+const SESSION_KEY = "DEEPCORE_SESSION_V5";
+const VERSION = 5;
+const SESSION_DAYS = 30;
+const MAX_OFFLINE_SECONDS = 604800;
+
+/* -----------------------------
+   Tiny DOM helpers
+   ----------------------------- */
 
 const $ = id => document.getElementById(id);
-const clamp = (n,min,max) => Math.max(min,Math.min(max,n));
-const fmt = n => Math.floor(Number(n)||0).toLocaleString();
-const money = n => "$" + fmt(n);
+const $$ = selector => Array.from(document.querySelectorAll(selector));
 
-let accounts = {};
+/* -----------------------------
+   Runtime state
+   ----------------------------- */
+
+let database = loadDatabase();
 let player = null;
+let marketMultiplier = 1;
 let lastTick = Date.now();
 let lastSave = Date.now();
-let marketTimer = 0;
-let eventTimer = 0;
-let autosaveTimer = 0;
-let modalAction = null;
+let marketTimer = null;
+let autoSaveTimer = null;
+let toastTimer = null;
+let offlineProcessed = false;
 
-/* =========================================================
-   DATA TABLES
-   ========================================================= */
+/* -----------------------------
+   Number formatting
+   ----------------------------- */
 
-const ORES = [
- {id:"stone",name:"Stone",base:1,rarity:"Common",color:"#858b91",min:1},
- {id:"coal",name:"Coal",base:3,rarity:"Common",color:"#3e444a",min:1},
- {id:"copper",name:"Copper",base:7,rarity:"Common",color:"#c37d52",min:3},
- {id:"iron",name:"Iron",base:12,rarity:"Common",color:"#aeb7c1",min:5},
- {id:"silver",name:"Silver",base:25,rarity:"Uncommon",color:"#d8e1ea",min:10},
- {id:"gold",name:"Gold",base:65,rarity:"Rare",color:"#e5ad4d",min:15},
- {id:"crystal",name:"Crystal",base:120,rarity:"Rare",color:"#75e7ff",min:25},
- {id:"ruby",name:"Ruby",base:240,rarity:"Epic",color:"#ef6464",min:40},
- {id:"platinum",name:"Platinum",base:450,rarity:"Epic",color:"#b9d4ed",min:60},
- {id:"obsidian",name:"Obsidian",base:800,rarity:"Legendary",color:"#a987ff",min:90},
- {id:"uranium",name:"Uranium",base:1500,rarity:"Legendary",color:"#72f0a8",min:125},
- {id:"core",name:"Core Fragment",base:5000,rarity:"MYTHIC",color:"#ffb45d",min:250}
-];
-
-const ZONES = [
- {id:"surface",name:"Surface Mine",min:1,desc:"Stone, coal, copper and iron.",mult:1},
- {id:"crystal",name:"Crystal Caverns",min:10,desc:"Silver, gold and glowing crystals.",mult:1.25},
- {id:"magma",name:"Magma Tunnels",min:25,desc:"Ruby, obsidian and extreme heat.",mult:1.55},
- {id:"frozen",name:"Frozen Depths",min:50,desc:"Platinum and ancient ice crystals.",mult:1.9},
- {id:"ruins",name:"Ancient Ruins",min:100,desc:"Legendary relic minerals.",mult:2.5},
- {id:"core",name:"Deep Core",min:250,desc:"Core fragments worth enormous sums.",mult:4}
-];
-
-const UPGRADES = [
- {id:"power",name:"Reinforced Pickaxe",desc:"+2 manual ore per level.",base:50,growth:1.55},
- {id:"drill",name:"Automatic Drill",desc:"+1 automated ore/sec.",base:180,growth:1.68},
- {id:"crusher",name:"Ore Crusher",desc:"+10% ore value.",base:550,growth:1.82},
- {id:"storage",name:"Storage Tank",desc:"+250 storage.",base:300,growth:1.62},
- {id:"scanner",name:"Ore Scanner",desc:"+1.5% rare-find chance.",base:950,growth:1.95},
- {id:"worker",name:"Mining Workers",desc:"+4 automated ore/sec.",base:2600,growth:2.08},
- {id:"excavator",name:"Excavator",desc:"+15 automated ore/sec and +10 power.",base:12500,growth:2.25},
- {id:"warehouse",name:"Warehouse",desc:"+1,000 storage.",base:5200,growth:1.95},
- {id:"refinery",name:"Advanced Refinery",desc:"+25% ore value.",base:18500,growth:2.35},
- {id:"market",name:"Market Office",desc:"Raises market floor and price bonus.",base:26000,growth:2.45},
- {id:"laser",name:"Laser Cutter",desc:"+25 manual ore per level.",base:65000,growth:2.55},
- {id:"quantum",name:"Quantum Extractor",desc:"+50 automated ore/sec.",base:180000,growth:2.7}
-];
-
-const RESEARCH = [
- {id:"mining",name:"Mining Science",desc:"+5% manual power.",base:1},
- {id:"automation",name:"Automation Theory",desc:"+3% automated production.",base:1},
- {id:"geology",name:"Advanced Geology",desc:"+1% rare chance.",base:1},
- {id:"logistics",name:"Logistics",desc:"+7% storage.",base:1},
- {id:"refining",name:"Refining Science",desc:"+4% ore value.",base:1},
- {id:"markets",name:"Market Theory",desc:"+2% market floor.",base:1}
-];
-
-const ACHIEVEMENTS = [
- {id:"first",name:"First Strike",desc:"Mine your first ore.",test:p=>p.hits>=1,reward:25},
- {id:"hundred",name:"Hard Worker",desc:"Mine 100 times.",test:p=>p.hits>=100,reward:100},
- {id:"thousand",name:"Workhorse",desc:"Mine 1,000 times.",test:p=>p.hits>=1000,reward:500},
- {id:"cash1k",name:"Cash Flow",desc:"Earn $1,000 lifetime.",test:p=>p.lifetimeCash>=1000,reward:100},
- {id:"cash100k",name:"Business",desc:"Earn $100,000 lifetime.",test:p=>p.lifetimeCash>=100000,reward:5000},
- {id:"million",name:"Millionaire",desc:"Earn $1,000,000 lifetime.",test:p=>p.lifetimeCash>=1000000,reward:25000},
- {id:"deep10",name:"Ten Meters",desc:"Reach 10m.",test:p=>p.depth>=10,reward:1000},
- {id:"deep50",name:"Deep Diver",desc:"Reach 50m.",test:p=>p.depth>=50,reward:5000},
- {id:"deep100",name:"Deep Explorer",desc:"Reach 100m.",test:p=>p.depth>=100,reward:15000},
- {id:"core",name:"Core Master",desc:"Reach 250m.",test:p=>p.depth>=250,reward:100000},
- {id:"rare10",name:"Lucky Miner",desc:"Find 10 rare veins.",test:p=>p.rareFinds>=10,reward:5000},
- {id:"rare100",name:"Geological Freak",desc:"Find 100 rare veins.",test:p=>p.rareFinds>=100,reward:50000},
- {id:"auto",name:"Automation",desc:"Reach 10 ore/sec.",test:p=>getAutoRate(p)>=10,reward:1000},
- {id:"industrial",name:"Industrialist",desc:"Reach 100 ore/sec.",test:p=>getAutoRate(p)>=100,reward:10000},
- {id:"research",name:"Scientist",desc:"Buy 10 research levels.",test:p=>researchTotal(p)>=10,reward:10000},
- {id:"prestige",name:"New Beginning",desc:"Prestige once.",test:p=>p.prestige>=1,reward:25000},
- {id:"crate",name:"Treasure Hunter",desc:"Open 10 depth crates.",test:p=>p.crates>=10,reward:7500},
- {id:"critical",name:"Critical Strike",desc:"Land 100 critical hits.",test:p=>p.critHits>=100,reward:10000}
-];
-
-const MISSION_DEFS = [
- {id:"m1",name:"Hard Worker",desc:"Mine 250 times.",goal:250,type:"hits",reward:750},
- {id:"m2",name:"Small Fortune",desc:"Earn $10,000 lifetime.",goal:10000,type:"cash",reward:1500},
- {id:"m3",name:"Go Deeper",desc:"Reach 25m.",goal:25,type:"depth",reward:3000},
- {id:"m4",name:"Lucky Strike",desc:"Find 8 rare veins.",goal:8,type:"rare",reward:4500},
- {id:"m5",name:"Industrial Growth",desc:"Reach 25 ore/sec.",goal:25,type:"auto",reward:6000},
- {id:"m6",name:"Serious Money",desc:"Earn $100,000 lifetime.",goal:100000,type:"cash",reward:15000}
-];
-
-const CONTRACT_TEMPLATES = [
- {id:"stone",name:"Construction Stone",type:"ore",ore:"stone",goal:1000,reward:1000},
- {id:"coal",name:"Power Plant",type:"ore",ore:"coal",goal:500,reward:2500},
- {id:"iron",name:"Steel Factory",type:"ore",ore:"iron",goal:300,reward:5000},
- {id:"gold",name:"Luxury Order",type:"ore",ore:"gold",goal:50,reward:9000},
- {id:"crystal",name:"Research Shipment",type:"ore",ore:"crystal",goal:20,reward:12000},
- {id:"depth",name:"Deep Survey",type:"depth",goal:75,reward:15000}
-];
-
-/* =========================================================
-   PLAYER CREATION / SAVE NORMALIZATION
-   ========================================================= */
-
-function createPlayer(username){
- const p={
-  username,
-  money:250,
-  ore:0,
-  depth:1,
-  deepestDepth:1,
-  zone:0,
-  lastSeen:Date.now(),
-  createdAt:Date.now(),
-  lifetimeCash:0,
-  lifetimeOre:0,
-  hits:0,
-  critHits:0,
-  rareFinds:0,
-  crates:0,
-  contractsCompleted:0,
-  events:0,
-  timePlayed:0,
-  streak:0,
-  bestStreak:0,
-  prestige:0,
-  researchPoints:0,
-  inventory:{},
-  upgrades:{},
-  research:{},
-  missions:{},
-  achievements:{},
-  contracts:[],
-  contractRerolls:0,
-  settings:{sound:true,autoSave:true,reducedEffects:false},
-  daily:{day:"",claimed:false},
-  stats:{manualOre:0,autoOre:0,offlineCash:0,marketCash:0,rareCash:0}
- };
- ORES.forEach(o=>p.inventory[o.id]=0);
- UPGRADES.forEach(u=>p.upgrades[u.id]=0);
- RESEARCH.forEach(r=>p.research[r.id]=0);
- return p;
+function number(value) {
+  return Math.floor(Number(value) || 0).toLocaleString();
 }
 
-function normalizePlayer(p,username){
- const base=createPlayer(username);
- const out=Object.assign(base,p||{});
- out.username=username;
- out.inventory=Object.assign(base.inventory,p&&p.inventory||{});
- out.upgrades=Object.assign(base.upgrades,p&&p.upgrades||{});
- out.research=Object.assign(base.research,p&&p.research||{});
- out.missions=Object.assign({},p&&p.missions||{});
- out.achievements=Object.assign({},p&&p.achievements||{});
- out.settings=Object.assign(base.settings,p&&p.settings||{});
- out.stats=Object.assign(base.stats,p&&p.stats||{});
- out.contracts=Array.isArray(p&&p.contracts)?p.contracts:[];
- if(!out.contracts.length)generateContracts(out);
- return out;
+function decimal(value, places = 2) {
+  return Number(value || 0).toFixed(places);
 }
 
-function loadAccounts(){
- try{
-  accounts=JSON.parse(localStorage.getItem(SAVE_KEY)||"{}")||{};
- }catch(e){
-  accounts={};
- }
+function money(value) {
+  return "$" + number(value);
 }
 
-function saveAccounts(){
- try{
-  localStorage.setItem(SAVE_KEY,JSON.stringify(accounts));
- }catch(e){
-  toast("Save failed — browser storage may be full.");
- }
-}
-
-function savePlayer(){
- if(!player)return;
- player.lastSeen=Date.now();
- accounts[player.username]={
-  password:accounts[player.username]?.password||"",
-  data:player
- };
- saveAccounts();
- lastSave=Date.now();
-}
-
-/* =========================================================
-   AUTH
-   ========================================================= */
-
-function authMessage(text,error=true){
- $("authMsg").textContent=text;
- $("authMsg").style.color=error?"var(--red)":"var(--green)";
-}
-
-function createAccount(){
- const username=$("authUser").value.trim().toLowerCase();
- const password=$("authPass").value;
- if(!/^[a-z0-9_]{3,24}$/.test(username)){
-  authMessage("Username must be 3–24 characters using letters, numbers or underscores.");
-  return;
- }
- if(password.length<8){
-  authMessage("Password must be at least 8 characters.");
-  return;
- }
- if(accounts[username]){
-  authMessage("That username already exists.");
-  return;
- }
- player=createPlayer(username);
- accounts[username]={password,data:player};
- saveAccounts();
- authMessage("Account created. You can now log in.",false);
- toast("Account created");
-}
-
-function login(){
- const username=$("authUser").value.trim().toLowerCase();
- const password=$("authPass").value;
- const record=accounts[username];
- if(!record){
-  authMessage("Account not found.");
-  return;
- }
- if(record.password!==password){
-  authMessage("Incorrect password.");
-  return;
- }
- player=normalizePlayer(record.data,username);
- calculateOfflineEarnings();
- $("authScreen").classList.add("hidden");
- $("gameScreen").classList.remove("hidden");
- $("topUser").textContent=player.username;
- activity("Welcome back, "+player.username+".");
- refreshAll();
- savePlayer();
-}
-
-function logout(){
- savePlayer();
- player=null;
- $("gameScreen").classList.add("hidden");
- $("authScreen").classList.remove("hidden");
- $("authPass").value="";
- authMessage("");
-}
-
-/* =========================================================
-   ECONOMY / STATS
-   ========================================================= */
-
-function upgradeLevel(id){
- return Number(player.upgrades[id]||0);
-}
-
-function researchLevel(id){
- return Number(player.research[id]||0);
-}
-
-function upgradeCost(def){
- return Math.floor(def.base*Math.pow(def.growth,upgradeLevel(def.id)));
-}
-
-function researchCost(def){
- return Math.floor(1+Math.pow(researchLevel(def.id)+1,1.65));
-}
-
-function getPower(p=player){
- let base=1+(p.upgrades.power||0)*2+(p.upgrades.excavator||0)*10+(p.upgrades.laser||0)*25;
- base*=1+(p.research.mining||0)*.05;
- base*=1+(p.prestige||0)*.05;
- return Math.floor(base);
-}
-
-function getAutoRate(p=player){
- let base=(p.upgrades.drill||0)+(p.upgrades.worker||0)*4+
-  (p.upgrades.excavator||0)*15+(p.upgrades.quantum||0)*50;
- base*=1+(p.research.automation||0)*.03;
- base*=1+(p.prestige||0)*.03;
- return base;
-}
-
-function getStorage(p=player){
- let base=500+(p.upgrades.storage||0)*250+(p.upgrades.warehouse||0)*1000;
- base*=1+(p.research.logistics||0)*.07;
- return Math.floor(base);
-}
-
-function getValueMultiplier(p=player){
- return 1+
-  (p.upgrades.crusher||0)*.10+
-  (p.upgrades.refinery||0)*.25+
-  (p.research.refining||0)*.04+
-  (p.prestige||0)*.05;
-}
-
-function getRareChance(p=player){
- return clamp(
-  .018+
-  (p.upgrades.scanner||0)*.015+
-  (p.research.geology||0)*.01+
-  (p.prestige||0)*.005,
-  0,.55
- );
-}
-
-function getMarketFloor(p=player){
- return clamp(.65+(p.upgrades.market||0)*.025+(p.research.markets||0)*.02, .65, .95);
-}
-
-function getZone(){
- return ZONES[Math.max(0,Math.min(ZONES.length-1,player.zone))];
-}
-
-function getDepthNeed(){
- return Math.floor(100+Math.pow(player.depth,1.45)*45);
-}
-
-function getOreForDepth(depth=player.depth){
- const available=ORES.filter(o=>o.min<=depth);
- const weighted=[];
- available.forEach(o=>{
-  let weight=1;
-  if(o.min<=depth*.3)weight+=5;
-  if(o.min<=depth*.6)weight+=2;
-  if(o.min>depth*.85)weight=.5;
-  for(let i=0;i<Math.max(1,Math.floor(weight));i++)weighted.push(o);
- });
- return weighted[Math.floor(Math.random()*weighted.length)]||ORES[0];
-}
-
-function researchTotal(p=player){
- return Object.values(p.research).reduce((a,b)=>a+b,0);
-}
-
-function totalOwnedOre(){
- return Object.values(player.inventory).reduce((a,b)=>a+b,0);
-}
-
-function addMoney(amount,reason){
- amount=Math.max(0,Number(amount)||0);
- player.money+=amount;
- player.lifetimeCash+=amount;
- if(reason)activity(reason+" +"+money(amount));
-}
-
-function addOre(id,amount,source=""){
- amount=Math.max(0,Math.floor(amount));
- if(amount<=0)return 0;
- const room=Math.max(0,getStorage()-totalOwnedOre());
- const actual=Math.min(room,amount);
- player.inventory[id]=(player.inventory[id]||0)+actual;
- player.ore=totalOwnedOre();
- player.lifetimeOre+=actual;
- if(source==="manual")player.stats.manualOre+=actual;
- if(source==="auto")player.stats.autoOre+=actual;
- return actual;
-}
-
-function orePrice(ore){
- return ore.base*getValueMultiplier()*marketMultiplier(ore);
-}
-
-function marketMultiplier(ore){
- const rarityBonus={
-  Common:0,
-  Uncommon:.05,
-  Rare:.12,
-  Epic:.22,
-  Legendary:.35,
-  MYTHIC:.6
- }[ore.rarity]||0;
- return market* (1+rarityBonus);
-}
-
-function sellAllOre(){
- const owned=totalOwnedOre();
- if(owned<=0){
-  toast("You have no ore to sell.");
-  return;
- }
- let total=0;
- ORES.forEach(o=>{
-  const qty=player.inventory[o.id]||0;
-  if(qty>0){
-   total+=qty*orePrice(o);
-   player.inventory[o.id]=0;
+function compact(value) {
+  const n = Number(value) || 0;
+  if (Math.abs(n) < 1000) {
+    return Math.floor(n).toString();
   }
- });
- total=Math.floor(total);
- player.ore=0;
- player.stats.marketCash+=total;
- addMoney(total,"Sold all ore for");
- refreshAll();
- savePlayer();
+  if (Math.abs(n) < 1000000) {
+    return (n / 1000).toFixed(1) + "K";
+  }
+  if (Math.abs(n) < 1000000000) {
+    return (n / 1000000).toFixed(1) + "M";
+  }
+  if (Math.abs(n) < 1000000000000) {
+    return (n / 1000000000).toFixed(1) + "B";
+  }
+  return (n / 1000000000000).toFixed(1) + "T";
 }
+
+/* -----------------------------
+   Database loading
+   ----------------------------- */
+
+function loadDatabase() {
+  try {
+    const raw = localStorage.getItem(DB_KEY);
+    if (!raw) {
+      return {};
+    }
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object") {
+      return {};
+    }
+    return parsed;
+  } catch (error) {
+    console.warn("Database load failed", error);
+    return {};
+  }
+}
+
+/* -----------------------------
+   Database saving
+   ----------------------------- */
+
+function saveDatabase() {
+  localStorage.setItem(DB_KEY, JSON.stringify(database));
+}
+
+/* -----------------------------
+   Session handling
+   ----------------------------- */
+
+function getSession() {
+  try {
+    const raw = localStorage.getItem(SESSION_KEY);
+    if (!raw) {
+      return null;
+    }
+    const session = JSON.parse(raw);
+    if (!session || !session.username || !session.expiresAt) {
+      return null;
+    }
+    return session;
+  } catch (error) {
+    return null;
+  }
+}
+
+function createSession(username) {
+  const expiresAt = Date.now() + SESSION_DAYS * 24 * 60 * 60 * 1000;
+  localStorage.setItem(
+    SESSION_KEY,
+    JSON.stringify({
+      username,
+      expiresAt,
+      createdAt: Date.now()
+    })
+  );
+}
+
+function clearSession() {
+  localStorage.removeItem(SESSION_KEY);
+}
+
+function sessionIsValid(session) {
+  if (!session) {
+    return false;
+  }
+  return Date.now() < Number(session.expiresAt);
+}
+
+function sessionDaysLeft(session) {
+  if (!session) {
+    return 0;
+  }
+  const remaining = Number(session.expiresAt) - Date.now();
+  return Math.max(0, Math.ceil(remaining / 86400000));
+}
+
+/* -----------------------------
+   Safe player schema
+   ----------------------------- */
+
+function freshPlayer(username, password) {
+  return {
+    version: VERSION,
+    username,
+    password,
+    createdAt: Date.now(),
+    lastSeen: Date.now(),
+    lastLogin: Date.now(),
+    money: 250,
+    ore: 0,
+    depth: 1,
+    zone: 0,
+    lifetime: 0,
+    totalOre: 0,
+    hits: 0,
+    rare: 0,
+    time: 0,
+    contracts: 0,
+    crates: 0,
+    prestige: 0,
+    streak: 0,
+    bestStreak: 0,
+    combo: 0,
+    bestCombo: 0,
+    criticalHits: 0,
+    discoveries: 0,
+    dailyClaimed: "",
+    dailyStreak: 0,
+    lastDaily: "",
+    lastMarketRefresh: Date.now(),
+    inventory: {
+      coal: 0,
+      iron: 0,
+      copper: 0,
+      silver: 0,
+      gold: 0,
+      emerald: 0,
+      ruby: 0,
+      sapphire: 0,
+      diamond: 0,
+      obsidian: 0,
+      crystal: 0,
+      core: 0
+    },
+    minedByOre: {},
+    up: {
+      power: 0,
+      drill: 0,
+      crusher: 0,
+      storage: 0,
+      scanner: 0,
+      worker: 0,
+      excavator: 0,
+      warehouse: 0,
+      refinery: 0,
+      market: 0,
+      magnet: 0,
+      coolant: 0,
+      laser: 0,
+      drone: 0,
+      reactor: 0
+    },
+    equipment: {
+      pickaxe: 0,
+      helmet: 0,
+      suit: 0,
+      boots: 0
+    },
+    research: {
+      geology: 0,
+      automation: 0,
+      metallurgy: 0,
+      logistics: 0,
+      energy: 0,
+      luck: 0
+    },
+    drones: {
+      scout: 0,
+      miner: 0,
+      hauler: 0
+    },
+    missions: {},
+    achievements: {},
+    contractsData: {
+      active: null,
+      completed: 0
+    },
+    stats: {
+      sessions: 0,
+      manualOre: 0,
+      autoOre: 0,
+      offlineCash: 0,
+      offlineSeconds: 0,
+      marketSales: 0,
+      totalSales: 0,
+      upgradesBought: 0,
+      researchBought: 0,
+      equipmentBought: 0,
+      zoneChanges: 0,
+      events: 0,
+      dailyClaims: 0,
+      cratesOpened: 0
+    },
+    settings: {
+      sound: true,
+      autosave: true,
+      reducedMotion: false,
+      confirmReset: true
+    },
+    codex: {},
+    notifications: []
+  };
+}
+
+/* -----------------------------
+   Player migration
+   ----------------------------- */
+
+function migratePlayer(old) {
+  const base = freshPlayer(
+    old && old.username ? old.username : "miner",
+    old && old.password ? old.password : ""
+  );
+
+  if (!old || typeof old !== "object") {
+    return base;
+  }
+
+  mergeObject(base, old);
+
+  if (!base.inventory) {
+    base.inventory = {};
+  }
+
+  if (!base.up) {
+    base.up = {};
+  }
+
+  if (!base.equipment) {
+    base.equipment = {};
+  }
+
+  if (!base.research) {
+    base.research = {};
+  }
+
+  if (!base.drones) {
+    base.drones = {};
+  }
+
+  if (!base.missions) {
+    base.missions = {};
+  }
+
+  if (!base.achievements) {
+    base.achievements = {};
+  }
+
+  if (!base.contractsData) {
+    base.contractsData = {
+      active: null,
+      completed: 0
+    };
+  }
+
+  if (!base.stats) {
+    base.stats = {};
+  }
+
+  if (!base.settings) {
+    base.settings = {};
+  }
+
+  Object.keys(freshPlayer(base.username, base.password).inventory)
+    .forEach(key => {
+      if (typeof base.inventory[key] !== "number") {
+        base.inventory[key] = 0;
+      }
+    });
+
+  Object.keys(freshPlayer(base.username, base.password).up)
+    .forEach(key => {
+      if (typeof base.up[key] !== "number") {
+        base.up[key] = 0;
+      }
+    });
+
+  Object.keys(freshPlayer(base.username, base.password).equipment)
+    .forEach(key => {
+      if (typeof base.equipment[key] !== "number") {
+        base.equipment[key] = 0;
+      }
+    });
+
+  Object.keys(freshPlayer(base.username, base.password).research)
+    .forEach(key => {
+      if (typeof base.research[key] !== "number") {
+        base.research[key] = 0;
+      }
+    });
+
+  Object.keys(freshPlayer(base.username, base.password).drones)
+    .forEach(key => {
+      if (typeof base.drones[key] !== "number") {
+        base.drones[key] = 0;
+      }
+    });
+
+  return base;
+}
+
+function mergeObject(target, source) {
+  Object.keys(source).forEach(key => {
+    if (
+      source[key] &&
+      typeof source[key] === "object" &&
+      !Array.isArray(source[key]) &&
+      target[key] &&
+      typeof target[key] === "object" &&
+      !Array.isArray(target[key])
+    ) {
+      mergeObject(target[key], source[key]);
+    } else {
+      target[key] = source[key];
+    }
+  });
+}
+
+/* -----------------------------
+   Legacy save migration
+   ----------------------------- */
+
+function migrateLegacyDatabase() {
+  let changed = false;
+
+  Object.keys(database).forEach(username => {
+    const record = database[username];
+
+    if (
+      record &&
+      record.data &&
+      typeof record.data === "object"
+    ) {
+      const data = migratePlayer(record.data);
+      data.username = username;
+      data.password = record.password || data.password || "";
+      database[username] = {
+        password: data.password,
+        data
+      };
+      changed = true;
+      return;
+    }
+
+    if (
+      record &&
+      typeof record === "object" &&
+      record.username &&
+      record.money !== undefined
+    ) {
+      const data = migratePlayer(record);
+      data.username = username;
+      database[username] = {
+        password: data.password || "",
+        data
+      };
+      changed = true;
+    }
+  });
+
+  if (changed) {
+    saveDatabase();
+  }
+}
+
+/* -----------------------------
+   UI references
+   ----------------------------- */
+
+const auth = $("auth");
+const app = $("app");
+const usernameInput = $("usernameInput");
+const passwordInput = $("passwordInput");
+const authMessage = $("authMessage");
+const loginButton = $("loginButton");
+const createButton = $("createButton");
+const who = $("who");
+const sessionDays = $("sessionDays");
+const moneyTop = $("moneyTop");
+const cash = $("cash");
+const ore = $("ore");
+const power = $("power");
+const autoRate = $("autoRate");
+const depth = $("depth");
+const progress = $("progress");
+const depthNeed = $("depthNeed");
+const depthBar = $("depthBar");
+const storage = $("storage");
+const cashRate = $("cashRate");
+const offlinePanel = $("offlinePanel");
+const activityLog = $("activityLog");
+const pickaxe = $("pickaxe");
+const mineView = $("mineView");
+const toastElement = $("toast");
+const upgradeList = $("upgradeList");
+const zoneList = $("zoneList");
+const missionList = $("missionList");
+const achievementList = $("achievementList");
+const equipmentList = $("equipmentList");
+const researchList = $("researchList");
+const droneList = $("droneList");
+const contractPanel = $("contractPanel");
+const inventoryList = $("inventoryList");
+const leaderboardList = $("leaderboardList");
+const eventPanel = $("eventPanel");
+
+/* -----------------------------
+   Upgrade definitions
+   ----------------------------- */
+
+const upgrades = [
+  {
+    id: "power",
+    name: "Reinforced Pickaxe",
+    desc: "+2 ore per manual hit.",
+    base: 40,
+    growth: 1.55
+  },
+  {
+    id: "drill",
+    name: "Automatic Drill",
+    desc: "+1 ore per second.",
+    base: 150,
+    growth: 1.70
+  },
+  {
+    id: "crusher",
+    name: "Ore Crusher",
+    desc: "+10% ore sale value.",
+    base: 500,
+    growth: 1.90
+  },
+  {
+    id: "storage",
+    name: "Storage Tank",
+    desc: "+250 ore storage.",
+    base: 300,
+    growth: 1.65
+  },
+  {
+    id: "scanner",
+    name: "Ore Scanner",
+    desc: "+1.5% rare-find chance.",
+    base: 900,
+    growth: 2.00
+  },
+  {
+    id: "worker",
+    name: "Mining Workers",
+    desc: "+4 ore per second.",
+    base: 2500,
+    growth: 2.15
+  },
+  {
+    id: "excavator",
+    name: "Heavy Excavator",
+    desc: "+15 ore/sec and +10 manual power.",
+    base: 12000,
+    growth: 2.30
+  },
+  {
+    id: "warehouse",
+    name: "Warehouse",
+    desc: "+1,000 storage.",
+    base: 5000,
+    growth: 2.00
+  },
+  {
+    id: "refinery",
+    name: "Advanced Refinery",
+    desc: "+25% sale value.",
+    base: 18000,
+    growth: 2.40
+  },
+  {
+    id: "market",
+    name: "Market Office",
+    desc: "Improves the market floor.",
+    base: 25000,
+    growth: 2.50
+  },
+  {
+    id: "magnet",
+    name: "Magnetic Separator",
+    desc: "+5% automatic collection.",
+    base: 40000,
+    growth: 2.35
+  },
+  {
+    id: "coolant",
+    name: "Cryo Coolant",
+    desc: "Reduces random machine downtime.",
+    base: 60000,
+    growth: 2.45
+  },
+  {
+    id: "laser",
+    name: "Laser Cutter",
+    desc: "+25% manual power.",
+    base: 85000,
+    growth: 2.55
+  },
+  {
+    id: "drone",
+    name: "Drone Bay",
+    desc: "+1 drone slot.",
+    base: 125000,
+    growth: 2.65
+  },
+  {
+    id: "reactor",
+    name: "Core Reactor",
+    desc: "+35% total production.",
+    base: 300000,
+    growth: 2.80
+  }
+];
+
+/* -----------------------------
+   Equipment definitions
+   ----------------------------- */
+
+const equipment = [
+  {
+    id: "pickaxe",
+    name: "Titanium Pickaxe",
+    desc: "+20% manual mining.",
+    base: 5000,
+    growth: 2.10,
+    max: 20
+  },
+  {
+    id: "helmet",
+    name: "Scanner Helmet",
+    desc: "+2% rare-find chance.",
+    base: 7500,
+    growth: 2.20,
+    max: 15
+  },
+  {
+    id: "suit",
+    name: "Pressure Suit",
+    desc: "+5% deep-zone production.",
+    base: 15000,
+    growth: 2.25,
+    max: 15
+  },
+  {
+    id: "boots",
+    name: "Mag-Boots",
+    desc: "+5% streak duration.",
+    base: 12000,
+    growth: 2.15,
+    max: 15
+  }
+];
+
+/* -----------------------------
+   Research definitions
+   ----------------------------- */
+
+const research = [
+  {
+    id: "geology",
+    name: "Geology",
+    desc: "+3% ore value per level.",
+    base: 10000,
+    growth: 1.85,
+    max: 20
+  },
+  {
+    id: "automation",
+    name: "Automation",
+    desc: "+4% automatic production per level.",
+    base: 12000,
+    growth: 1.90,
+    max: 20
+  },
+  {
+    id: "metallurgy",
+    name: "Metallurgy",
+    desc: "+2% rare ore yield per level.",
+    base: 18000,
+    growth: 2.00,
+    max: 20
+  },
+  {
+    id: "logistics",
+    name: "Logistics",
+    desc: "+250 storage per level.",
+    base: 14000,
+    growth: 1.95,
+    max: 20
+  },
+  {
+    id: "energy",
+    name: "Energy",
+    desc: "+2% reactor production per level.",
+    base: 22000,
+    growth: 2.05,
+    max: 20
+  },
+  {
+    id: "luck",
+    name: "Fortune",
+    desc: "+1% rare-find chance per level.",
+    base: 30000,
+    growth: 2.15,
+    max: 20
+  }
+];
+
+/* -----------------------------
+   Drone definitions
+   ----------------------------- */
+
+const drones = [
+  {
+    id: "scout",
+    name: "Scout Drone",
+    desc: "Finds rare discoveries while you mine.",
+    base: 20000,
+    growth: 2.20,
+    max: 10
+  },
+  {
+    id: "miner",
+    name: "Miner Drone",
+    desc: "+8 ore/sec per drone.",
+    base: 35000,
+    growth: 2.30,
+    max: 10
+  },
+  {
+    id: "hauler",
+    name: "Hauler Drone",
+    desc: "+2,000 storage per drone.",
+    base: 50000,
+    growth: 2.35,
+    max: 10
+  }
+];
+
+/* -----------------------------
+   Ore definitions
+   ----------------------------- */
+
+const ores = [
+  {
+    id: "coal",
+    name: "Coal",
+    value: 1,
+    minDepth: 1,
+    rarity: 0.48
+  },
+  {
+    id: "iron",
+    name: "Iron",
+    value: 2,
+    minDepth: 1,
+    rarity: 0.27
+  },
+  {
+    id: "copper",
+    name: "Copper",
+    value: 3,
+    minDepth: 3,
+    rarity: 0.13
+  },
+  {
+    id: "silver",
+    name: "Silver",
+    value: 8,
+    minDepth: 8,
+    rarity: 0.055
+  },
+  {
+    id: "gold",
+    name: "Gold",
+    value: 20,
+    minDepth: 15,
+    rarity: 0.028
+  },
+  {
+    id: "emerald",
+    name: "Emerald",
+    value: 45,
+    minDepth: 30,
+    rarity: 0.014
+  },
+  {
+    id: "ruby",
+    name: "Ruby",
+    value: 70,
+    minDepth: 45,
+    rarity: 0.008
+  },
+  {
+    id: "sapphire",
+    name: "Sapphire",
+    value: 110,
+    minDepth: 65,
+    rarity: 0.0045
+  },
+  {
+    id: "diamond",
+    name: "Diamond",
+    value: 250,
+    minDepth: 100,
+    rarity: 0.002
+  },
+  {
+    id: "obsidian",
+    name: "Obsidian",
+    value: 450,
+    minDepth: 150,
+    rarity: 0.001
+  },
+  {
+    id: "crystal",
+    name: "Core Crystal",
+    value: 900,
+    minDepth: 250,
+    rarity: 0.00045
+  },
+  {
+    id: "core",
+    name: "Core Fragment",
+    value: 2500,
+    minDepth: 500,
+    rarity: 0.00012
+  }
+];
+
+/* -----------------------------
+   Zone definitions
+   ----------------------------- */
+
+const zones = [
+  {
+    id: 0,
+    name: "Surface Mine",
+    depth: 1,
+    multiplier: 1,
+    description: "Stable rock and beginner deposits."
+  },
+  {
+    id: 1,
+    name: "Crystal Caverns",
+    depth: 10,
+    multiplier: 1.15,
+    description: "Rare crystals begin appearing."
+  },
+  {
+    id: 2,
+    name: "Magma Tunnels",
+    depth: 25,
+    multiplier: 1.35,
+    description: "Hot tunnels with valuable metal deposits."
+  },
+  {
+    id: 3,
+    name: "Frozen Depths",
+    depth: 50,
+    multiplier: 1.60,
+    description: "Cold, compressed rock with high yields."
+  },
+  {
+    id: 4,
+    name: "Ancient Ruins",
+    depth: 100,
+    multiplier: 2.00,
+    description: "Old structures hide unusual ore."
+  },
+  {
+    id: 5,
+    name: "Deep Core",
+    depth: 250,
+    multiplier: 2.75,
+    description: "The mine becomes extremely valuable."
+  },
+  {
+    id: 6,
+    name: "Core Rift",
+    depth: 500,
+    multiplier: 4.00,
+    description: "Unstable core material."
+  },
+  {
+    id: 7,
+    name: "Null Depth",
+    depth: 1000,
+    multiplier: 7.00,
+    description: "A zone beyond normal geology."
+  }
+];
+
+/* -----------------------------
+   Mission definitions
+   ----------------------------- */
+
+const missions = [
+  {
+    id: "first_hit",
+    name: "First Strike",
+    description: "Mine manually 1 time.",
+    target: 1,
+    reward: 100,
+    get: () => player.hits
+  },
+  {
+    id: "worker",
+    name: "Hard Worker",
+    description: "Mine manually 100 times.",
+    target: 100,
+    reward: 750,
+    get: () => player.hits
+  },
+  {
+    id: "cash",
+    name: "Small Fortune",
+    description: "Earn $5,000 lifetime.",
+    target: 5000,
+    reward: 1200,
+    get: () => player.lifetime
+  },
+  {
+    id: "depth10",
+    name: "Go Deeper",
+    description: "Reach 10m.",
+    target: 10,
+    reward: 1500,
+    get: () => player.depth
+  },
+  {
+    id: "rare",
+    name: "Lucky Miner",
+    description: "Find 5 rare veins.",
+    target: 5,
+    reward: 3000,
+    get: () => player.rare
+  },
+  {
+    id: "depth50",
+    name: "Pressure Zone",
+    description: "Reach 50m.",
+    target: 50,
+    reward: 8000,
+    get: () => player.depth
+  },
+  {
+    id: "million",
+    name: "Millionaire",
+    description: "Earn $1,000,000 lifetime.",
+    target: 1000000,
+    reward: 50000,
+    get: () => player.lifetime
+  },
+  {
+    id: "core",
+    name: "Core Seeker",
+    description: "Reach 250m.",
+    target: 250,
+    reward: 150000,
+    get: () => player.depth
+  }
+];
+
+/* -----------------------------
+   Achievement definitions
+   ----------------------------- */
+
+const achievements = [
+  {
+    id: "a_hit",
+    name: "First Strike",
+    description: "Mine your first hit.",
+    check: () => player.hits >= 1
+  },
+  {
+    id: "a_100",
+    name: "Hundred Hits",
+    description: "Mine 100 times.",
+    check: () => player.hits >= 100
+  },
+  {
+    id: "a_rare",
+    name: "Rare Hunter",
+    description: "Find 10 rare veins.",
+    check: () => player.rare >= 10
+  },
+  {
+    id: "a_1m",
+    name: "Millionaire",
+    description: "Earn $1,000,000 lifetime.",
+    check: () => player.lifetime >= 1000000
+  },
+  {
+    id: "a_100m",
+    name: "Industrial Giant",
+    description: "Earn $100,000,000 lifetime.",
+    check: () => player.lifetime >= 100000000
+  },
+  {
+    id: "a_100",
+    name: "Deep Explorer",
+    description: "Reach 100m.",
+    check: () => player.depth >= 100
+  },
+  {
+    id: "a_250",
+    name: "Core Master",
+    description: "Reach 250m.",
+    check: () => player.depth >= 250
+  },
+  {
+    id: "a_500",
+    name: "Rift Walker",
+    description: "Reach 500m.",
+    check: () => player.depth >= 500
+  },
+  {
+    id: "a_1000",
+    name: "Null Diver",
+    description: "Reach 1,000m.",
+    check: () => player.depth >= 1000
+  },
+  {
+    id: "a_auto",
+    name: "Automation",
+    description: "Reach 10 ore/sec automation.",
+    check: () => getAutoOrePerSecond() >= 10
+  },
+  {
+    id: "a_upgrade",
+    name: "Engineer",
+    description: "Buy 50 upgrades.",
+    check: () => player.stats.upgradesBought >= 50
+  },
+  {
+    id: "a_market",
+    name: "Trader",
+    description: "Sell ore through the market 25 times.",
+    check: () => player.stats.marketSales >= 25
+  },
+  {
+    id: "a_daily",
+    name: "Regular",
+    description: "Claim 7 daily rewards.",
+    check: () => player.stats.dailyClaims >= 7
+  },
+  {
+    id: "a_streak",
+    name: "Hot Streak",
+    description: "Reach a 25-hit streak.",
+    check: () => player.bestStreak >= 25
+  },
+  {
+    id: "a_crate",
+    name: "Treasure Hunter",
+    description: "Open 10 depth crates.",
+    check: () => player.crates >= 10
+  },
+  {
+    id: "a_prestige",
+    name: "Reborn",
+    description: "Prestige once.",
+    check: () => player.prestige >= 1
+  }
+];
+
+/* -----------------------------
+   Daily reward table
+   ----------------------------- */
+
+const dailyRewards = [
+  500,
+  1000,
+  2500,
+  5000,
+  10000,
+  25000,
+  100000
+];
+
+/* -----------------------------
+   Random event definitions
+   ----------------------------- */
+
+const events = [
+  {
+    id: "rich",
+    name: "Rich Vein",
+    description: "A large deposit was discovered.",
+    chance: 0.008
+  },
+  {
+    id: "cave",
+    name: "Cave Pulse",
+    description: "The rock vibrates and releases extra ore.",
+    chance: 0.006
+  },
+  {
+    id: "scanner",
+    name: "Scanner Sweep",
+    description: "The scanner detects a valuable pocket.",
+    chance: 0.004
+  },
+  {
+    id: "bonus",
+    name: "Market Surge",
+    description: "The market temporarily rises.",
+    chance: 0.003
+  }
+];
+
+/* -----------------------------
+   Utility calculations
+   ----------------------------- */
+
+function upgradeCost(def) {
+  const level = Number(player.up[def.id] || 0);
+  return Math.floor(def.base * Math.pow(def.growth, level));
+}
+
+function equipmentCost(def) {
+  const level = Number(player.equipment[def.id] || 0);
+  return Math.floor(def.base * Math.pow(def.growth, level));
+}
+
+function researchCost(def) {
+  const level = Number(player.research[def.id] || 0);
+  return Math.floor(def.base * Math.pow(def.growth, level));
+}
+
+function droneCost(def) {
+  const level = Number(player.drones[def.id] || 0);
+  return Math.floor(def.base * Math.pow(def.growth, level));
+}
+
+function storageCapacity() {
+  let value = 500;
+  value += player.up.storage * 250;
+  value += player.up.warehouse * 1000;
+  value += player.research.logistics * 250;
+  value += player.drones.hauler * 2000;
+  return Math.floor(value);
+}
+
+function basePower() {
+  let value = 1;
+  value += player.up.power * 2;
+  value += player.up.excavator * 10;
+  value *= 1 + player.up.laser * 0.25;
+  value *= 1 + player.equipment.pickaxe * 0.20;
+  value *= 1 + player.research.energy * 0.02;
+  return value;
+}
+
+function getAutoOrePerSecond() {
+  let value = 0;
+  value += player.up.drill;
+  value += player.up.worker * 4;
+  value += player.up.excavator * 15;
+  value += player.drones.miner * 8;
+  value *= 1 + player.up.magnet * 0.05;
+  value *= 1 + player.research.automation * 0.04;
+  value *= 1 + player.up.reactor * 0.35;
+  value *= 1 + player.research.energy * 0.02;
+  return value;
+}
+
+function valueMultiplier() {
+  let value = 1;
+  value += player.up.crusher * 0.10;
+  value += player.up.refinery * 0.25;
+  value += player.research.geology * 0.03;
+  value += player.prestige * 0.10;
+  value *= getZone().multiplier;
+  return value;
+}
+
+function rareChance() {
+  let value = 0.02;
+  value += player.up.scanner * 0.015;
+  value += player.equipment.helmet * 0.02;
+  value += player.research.luck * 0.01;
+  value += player.research.metallurgy * 0.005;
+  return Math.min(0.80, value);
+}
+
+function depthRequirement() {
+  return Math.floor(
+    100 +
+    Math.pow(player.depth, 1.45) * 45
+  );
+}
+
+function getZone() {
+  let active = zones[0];
+
+  zones.forEach(zone => {
+    if (player.depth >= zone.depth) {
+      active = zone;
+    }
+  });
+
+  if (player.zone > zones.length - 1) {
+    player.zone = zones.length - 1;
+  }
+
+  return zones[player.zone] || active;
+}
+
+function totalInventoryValue() {
+  let total = 0;
+
+  ores.forEach(oreDef => {
+    const amount = Number(player.inventory[oreDef.id] || 0);
+    total += amount * oreDef.value;
+  });
+
+  return total * valueMultiplier() * marketMultiplier;
+}
+
+/* -----------------------------
+   Ore rolling
+   ----------------------------- */
+
+function rollOre() {
+  const available = ores.filter(
+    oreDef => player.depth >= oreDef.minDepth
+  );
+
+  const weighted = [];
+
+  available.forEach(oreDef => {
+    let weight = oreDef.rarity;
+
+    if (oreDef.id === "coal") {
+      weight *= Math.max(0.25, 1 - player.depth / 1000);
+    }
+
+    if (
+      oreDef.id === "diamond" ||
+      oreDef.id === "obsidian" ||
+      oreDef.id === "crystal" ||
+      oreDef.id === "core"
+    ) {
+      weight *= 1 + player.research.metallurgy * 0.08;
+    }
+
+    weighted.push({
+      def: oreDef,
+      weight
+    });
+  });
+
+  const totalWeight = weighted.reduce(
+    (sum, item) => sum + item.weight,
+    0
+  );
+
+  let random = Math.random() * totalWeight;
+
+  for (const item of weighted) {
+    random -= item.weight;
+
+    if (random <= 0) {
+      return item.def;
+    }
+  }
+
+  return available[0];
+}
+
+/* -----------------------------
+   Add ore to inventory
+   ----------------------------- */
+
+function addOre(amount, manual = false) {
+  const room = Math.max(
+    0,
+    storageCapacity() - player.ore
+  );
+
+  const accepted = Math.min(
+    Math.max(0, amount),
+    room
+  );
+
+  player.ore += accepted;
+
+  if (manual) {
+    player.stats.manualOre += accepted;
+  } else {
+    player.stats.autoOre += accepted;
+  }
+
+  return accepted;
+}
+
+/* -----------------------------
+   Distribute ore into inventory
+   ----------------------------- */
+
+function distributeOre(amount, manual = false) {
+  let remaining = Math.floor(amount);
+
+  while (remaining > 0) {
+    const oreDef = rollOre();
+
+    player.inventory[oreDef.id] =
+      Number(player.inventory[oreDef.id] || 0) + 1;
+
+    player.minedByOre[oreDef.id] =
+      Number(player.minedByOre[oreDef.id] || 0) + 1;
+
+    player.discoveries +=
+      player.minedByOre[oreDef.id] === 1 ? 1 : 0;
+
+    remaining -= 1;
+  }
+
+  return addOre(amount, manual);
+}
+
+/* -----------------------------
+   Save player
+   ----------------------------- */
+
+function savePlayer() {
+  if (!player) {
+    return;
+  }
+
+  player.lastSeen = Date.now();
+
+  database[player.username] = {
+    password: player.password,
+    data: player
+  };
+
+  saveDatabase();
+
+  lastSave = Date.now();
+}
+
+/* -----------------------------
+   Create account
+   ----------------------------- */
+
+function createAccount() {
+  const username = usernameInput.value.trim().toLowerCase();
+  const password = passwordInput.value;
+
+  authMessage.textContent = "";
+
+  if (!/^[a-z0-9_]{3,24}$/.test(username)) {
+    authMessage.textContent =
+      "Username must be 3–24 characters using letters, numbers or underscores.";
+    return;
+  }
+
+  if (password.length < 8) {
+    authMessage.textContent =
+      "Password must be at least 8 characters.";
+    return;
+  }
+
+  if (database[username]) {
+    authMessage.textContent =
+      "That username already exists.";
+    return;
+  }
+
+  player = freshPlayer(username, password);
+
+  database[username] = {
+    password,
+    data: player
+  };
+
+  saveDatabase();
+  createSession(username);
+
+  showApp();
+
+  logActivity(
+    "Account created. Your mine is ready."
+  );
+
+  toast(
+    "Welcome to DEEPCORE, " + username
+  );
+
+  updateAll();
+}
+
+/* -----------------------------
+   Login
+   ----------------------------- */
+
+function login() {
+  const username = usernameInput.value.trim().toLowerCase();
+  const password = passwordInput.value;
+
+  authMessage.textContent = "";
+
+  const record = database[username];
+
+  if (!record) {
+    authMessage.textContent =
+      "Account not found on this device.";
+    return;
+  }
+
+  if (record.password !== password) {
+    authMessage.textContent =
+      "Incorrect password.";
+    return;
+  }
+
+  player = migratePlayer(record.data);
+
+  player.username = username;
+  player.password = record.password;
+  player.lastLogin = Date.now();
+  player.stats.sessions += 1;
+
+  createSession(username);
+
+  savePlayer();
+
+  processOfflineEarnings();
+
+  showApp();
+
+  logActivity(
+    "Welcome back, " + username + "."
+  );
+
+  updateAll();
+}
+
+/* -----------------------------
+   Automatic login
+   ----------------------------- */
+
+function tryAutomaticLogin() {
+  const session = getSession();
+
+  if (!session) {
+    showAuth();
+    return;
+  }
+
+  if (!sessionIsValid(session)) {
+    clearSession();
+    showAuth();
+    authMessage.textContent =
+      "Your 30-day login session expired. Please log in again.";
+    return;
+  }
+
+  const record = database[session.username];
+
+  if (!record) {
+    clearSession();
+    showAuth();
+    return;
+  }
+
+  player = migratePlayer(record.data);
+
+  player.username = session.username;
+  player.password = record.password;
+
+  player.stats.sessions += 1;
+
+  processOfflineEarnings();
+
+  showApp();
+
+  updateAll();
+
+  logActivity(
+    "Automatically logged in."
+  );
+}
+
+/* -----------------------------
+   Show auth
+   ----------------------------- */
+
+function showAuth() {
+  auth.classList.remove("hidden");
+  app.classList.add("hidden");
+  usernameInput.focus();
+}
+
+/* -----------------------------
+   Show app
+   ----------------------------- */
+
+function showApp() {
+  auth.classList.add("hidden");
+  app.classList.remove("hidden");
+}
+
+/* -----------------------------
+   Logout
+   ----------------------------- */
+
+function logout() {
+  if (!player) {
+    return;
+  }
+
+  savePlayer();
+
+  player = null;
+
+  clearSession();
+
+  showAuth();
+
+  usernameInput.value = "";
+  passwordInput.value = "";
+  authMessage.textContent =
+    "Logged out. Your save is still stored on this device.";
+
+  stopLoops();
+
+  toast("Logged out");
+}
+
+/* -----------------------------
+   Offline production
+   ----------------------------- */
+
+function processOfflineEarnings() {
+  if (!player || offlineProcessed) {
+    return;
+  }
+
+  offlineProcessed = true;
+
+  const now = Date.now();
+
+  const elapsed =
+    Math.max(
+      0,
+      Math.floor(
+        (now - Number(player.lastSeen || now)) / 1000
+      )
+    );
+
+  if (elapsed < 10) {
+    player.lastSeen = now;
+    return;
+  }
+
+  const seconds = Math.min(
+    elapsed,
+    MAX_OFFLINE_SECONDS
+  );
+
+  const rate = getAutoOrePerSecond();
+
+  if (rate <= 0) {
+    player.lastSeen = now;
+    return;
+  }
+
+  const rawOre =
+    rate *
+    seconds *
+    (1 + player.up.reactor * 0.35);
+
+  const oreEarned =
+    Math.min(
+      Math.floor(rawOre),
+      storageCapacity()
+    );
+
+  const cashEarned =
+    Math.floor(
+      oreEarned *
+      valueMultiplier() *
+      marketMultiplier
+    );
+
+  player.ore =
+    Math.min(
+      storageCapacity(),
+      player.ore + oreEarned
+    );
+
+  player.totalOre += oreEarned;
+
+  player.stats.offlineCash += cashEarned;
+  player.stats.offlineSeconds += seconds;
+
+  player.money += cashEarned;
+  player.lifetime += cashEarned;
+
+  player.lastSeen = now;
+
+  if (cashEarned > 0) {
+    offlinePanel.innerHTML =
+      "<b class='goldText'>+" +
+      money(cashEarned) +
+      " offline earnings</b>" +
+      "<br>" +
+      "<span class='small'>" +
+      formatDuration(seconds) +
+      " passed while you were away.</span>";
+
+    logActivity(
+      "Offline systems generated " +
+      money(cashEarned) +
+      "."
+    );
+  } else {
+    offlinePanel.textContent =
+      "No offline production was available.";
+  }
+
+  savePlayer();
+}
+
+/* -----------------------------
+   Manual mining
+   ----------------------------- */
+
+function mineOnce() {
+  if (!player) {
+    return;
+  }
+
+  const room =
+    storageCapacity() - player.ore;
+
+  if (room <= 0) {
+    toast("Storage is full.");
+    return;
+  }
+
+  let amount = basePower();
+
+  const critical =
+    Math.random() <
+    Math.min(
+      0.35,
+      0.03 +
+      player.research.luck * 0.005
+    );
+
+  if (critical) {
+    amount *= 2;
+    player.criticalHits += 1;
+  }
+
+  const accepted =
+    distributeOre(
+      Math.floor(amount),
+      true
+    );
+
+  player.hits += 1;
+
+  player.combo += 1;
+
+  player.streak += 1;
+
+  player.bestCombo =
+    Math.max(
+      player.bestCombo,
+      player.combo
+    );
+
+  player.bestStreak =
+    Math.max(
+      player.bestStreak,
+      player.streak
+    );
+
+  if (accepted > 0) {
+    createHitEffect();
+
+    showFloatingText(
+      "+" + number(accepted) + " ore"
+    );
+  }
+
+  if (critical) {
+    showFloatingText(
+      "CRITICAL x2"
+    );
+  }
+
+  if (
+    Math.random() <
+    rareChance()
+  ) {
+    triggerRareFind();
+  }
+
+  triggerRandomEvent();
+
+  updateAll();
+
+  if (
+    player.hits % 25 === 0
+  ) {
+    logActivity(
+      "Mining streak reached " +
+      number(player.hits) +
+      " hits."
+    );
+  }
+}
+
+/* -----------------------------
+   Rare find
+   ----------------------------- */
+
+function triggerRareFind() {
+  const bonus =
+    Math.floor(
+      (
+        25 +
+        player.depth * 8
+      ) *
+      valueMultiplier()
+    );
+
+  player.money += bonus;
+
+  player.lifetime += bonus;
+
+  player.rare += 1;
+
+  player.crates +=
+    Math.random() < 0.05
+      ? 1
+      : 0;
+
+  logActivity(
+    "◆ Rare vein found: +" +
+    money(bonus)
+  );
+
+  toast(
+    "Rare vein found!"
+  );
+}
+
+/* -----------------------------
+   Random event
+   ----------------------------- */
+
+function triggerRandomEvent() {
+  const roll = Math.random();
+
+  let cursor = 0;
+
+  for (const event of events) {
+    cursor += event.chance;
+
+    if (roll <= cursor) {
+      executeEvent(event);
+      return;
+    }
+  }
+}
+
+/* -----------------------------
+   Execute event
+   ----------------------------- */
+
+function executeEvent(event) {
+  player.stats.events += 1;
+
+  if (event.id === "rich") {
+    const bonus =
+      Math.max(
+        10,
+        Math.floor(
+          player.depth *
+          5 *
+          valueMultiplier()
+        )
+      );
+
+    player.money += bonus;
+    player.lifetime += bonus;
+
+    toast("Rich vein!");
+    logActivity(
+      event.name +
+      ": +" +
+      money(bonus)
+    );
+  }
+
+  if (event.id === "cave") {
+    const amount =
+      Math.max(
+        5,
+        Math.floor(
+          basePower() * 5
+        )
+      );
+
+    const accepted =
+      distributeOre(
+        amount,
+        false
+      );
+
+    toast("Cave pulse!");
+    logActivity(
+      event.name +
+      ": +" +
+      number(accepted) +
+      " ore."
+    );
+  }
+
+  if (event.id === "scanner") {
+    const bonus =
+      Math.floor(
+        100 *
+        valueMultiplier()
+      );
+
+    player.money += bonus;
+    player.lifetime += bonus;
+
+    toast("Scanner discovery!");
+    logActivity(
+      event.name +
+      ": +" +
+      money(bonus)
+    );
+  }
+
+  if (event.id === "bonus") {
+    marketMultiplier =
+      Math.min(
+        3,
+        marketMultiplier + 0.20
+      );
+
+    toast("Market surge!");
+    logActivity(
+      event.name +
+      ": market boosted."
+    );
+  }
+}
+
+/* -----------------------------
+   Hit effect
+   ----------------------------- */
+
+function createHitEffect() {
+  if (
+    player.settings.reducedMotion
+  ) {
+    return;
+  }
+
+  pickaxe.classList.add("hit");
+
+  setTimeout(() => {
+    pickaxe.classList.remove("hit");
+  }, 90);
+
+  const rect =
+    mineView.getBoundingClientRect();
+
+  const x =
+    rect.width * (
+      0.40 +
+      Math.random() * 0.20
+    );
+
+  const y =
+    rect.height * (
+      0.38 +
+      Math.random() * 0.20
+    );
+
+  const flash =
+    document.createElement("div");
+
+  flash.className =
+    "mineFlash";
+
+  flash.style.left =
+    x + "px";
+
+  flash.style.top =
+    y + "px";
+
+  mineView.appendChild(flash);
+
+  setTimeout(() => {
+    flash.remove();
+  }, 400);
+}
+
+/* -----------------------------
+   Floating text
+   ----------------------------- */
+
+function showFloatingText(text) {
+  if (
+    player.settings.reducedMotion
+  ) {
+    return;
+  }
+
+  const element =
+    document.createElement("div");
+
+  element.className =
+    "floatText";
+
+  element.textContent =
+    text;
+
+  element.style.left =
+    (
+      42 +
+      Math.random() * 18
+    ) + "%";
+
+  element.style.top =
+    (
+      42 +
+      Math.random() * 10
+    ) + "%";
+
+  mineView.appendChild(element);
+
+  setTimeout(() => {
+    element.remove();
+  }, 950);
+}
+
+/* -----------------------------
+   Sell ore
+   ----------------------------- */
+
+function sellAll(useMarket = false) {
+  if (!player) {
+    return;
+  }
+
+  if (player.ore <= 0) {
+    toast("You have no ore to sell.");
+    return;
+  }
+
+  const multiplier =
+    useMarket
+      ? marketMultiplier
+      : 1;
+
+  const amount =
+    Math.floor(
+      player.ore *
+      valueMultiplier() *
+      multiplier
+    );
+
+  player.money += amount;
+  player.lifetime += amount;
+  player.stats.totalSales += amount;
+
+  if (useMarket) {
+    player.stats.marketSales += 1;
+  }
+
+  clearInventory();
+
+  player.ore = 0;
+
+  logActivity(
+    "Sold your stored ore for " +
+    money(amount) +
+    "."
+  );
+
+  toast(
+    "Sale complete: " +
+    money(amount)
+  );
+
+  savePlayer();
+
+  updateAll();
+}
+
+/* -----------------------------
+   Clear ore inventory
+   ----------------------------- */
+
+function clearInventory() {
+  Object.keys(player.inventory)
+    .forEach(key => {
+      player.inventory[key] = 0;
+    });
+}
+
+/* -----------------------------
+   Descend
+   ----------------------------- */
+
+function descend() {
+  const required =
+    depthRequirement();
+
+  if (player.ore < required) {
+    toast(
+      "You need " +
+      number(required) +
+      " ore to descend."
+    );
+    return;
+  }
+
+  player.ore -= required;
+
+  player.depth += 1;
+
+  player.streak += 1;
+
+  player.crates +=
+    player.depth % 10 === 0
+      ? 1
+      : 0;
+
+  if (
+    player.depth % 10 === 0
+  ) {
+    openDepthCrate();
+  }
+
+  if (
+    player.depth % 25 === 0
+  ) {
+    player.discoveries += 1;
+
+    logActivity(
+      "Major depth milestone: " +
+      number(player.depth) +
+      "m."
+    );
+  }
+
+  updateZoneAutomatically();
+
+  savePlayer();
+
+  toast(
+    "Descended to " +
+    number(player.depth) +
+    "m"
+  );
+
+  updateAll();
+}
+
+/* -----------------------------
+   Zone selection
+   ----------------------------- */
+
+function selectZone(index) {
+  const zone = zones[index];
+
+  if (!zone) {
+    return;
+  }
+
+  if (player.depth < zone.depth) {
+    toast(
+      "Reach " +
+      number(zone.depth) +
+      "m first."
+    );
+    return;
+  }
+
+  player.zone = index;
+
+  player.stats.zoneChanges += 1;
+
+  logActivity(
+    "Entered " +
+    zone.name +
+    "."
+  );
+
+  savePlayer();
+
+  updateAll();
+}
+
+/* -----------------------------
+   Automatic zone update
+   ----------------------------- */
+
+function updateZoneAutomatically() {
+  let best = 0;
+
+  zones.forEach(
+    (zone, index) => {
+      if (
+        player.depth >=
+        zone.depth
+      ) {
+        best = index;
+      }
+    }
+  );
+
+  if (
+    player.zone < best
+  ) {
+    player.zone = best;
+
+    logActivity(
+      "New zone unlocked: " +
+      zones[best].name
+    );
+  }
+}
+
+/* -----------------------------
+   Upgrade purchase
+   ----------------------------- */
+
+function buyUpgrade(id) {
+  const def =
+    upgrades.find(
+      item => item.id === id
+    );
+
+  if (!def) {
+    return;
+  }
+
+  const level =
+    Number(player.up[id] || 0);
+
+  const cost =
+    upgradeCost(def);
+
+  if (player.money < cost) {
+    toast("Not enough cash.");
+    return;
+  }
+
+  player.money -= cost;
+
+  player.up[id] =
+    level + 1;
+
+  player.stats.upgradesBought += 1;
+
+  logActivity(
+    "Bought " +
+    def.name +
+    " level " +
+    number(level + 1) +
+    "."
+  );
+
+  savePlayer();
+
+  updateAll();
+}
+
+/* -----------------------------
+   Equipment purchase
+   ----------------------------- */
+
+function buyEquipment(id) {
+  const def =
+    equipment.find(
+      item => item.id === id
+    );
+
+  if (!def) {
+    return;
+  }
+
+  const level =
+    Number(
+      player.equipment[id] || 0
+    );
+
+  if (
+    level >= def.max
+  ) {
+    toast("Equipment is maxed.");
+    return;
+  }
+
+  const cost =
+    equipmentCost(def);
+
+  if (player.money < cost) {
+    toast("Not enough cash.");
+    return;
+  }
+
+  player.money -= cost;
+
+  player.equipment[id] =
+    level + 1;
+
+  player.stats.equipmentBought += 1;
+
+  logActivity(
+    "Upgraded " +
+    def.name +
+    " to level " +
+    number(level + 1) +
+    "."
+  );
+
+  savePlayer();
+
+  updateAll();
+}
+
+/* -----------------------------
+   Research purchase
+   ----------------------------- */
+
+function buyResearch(id) {
+  const def =
+    research.find(
+      item => item.id === id
+    );
+
+  if (!def) {
+    return;
+  }
+
+  const level =
+    Number(
+      player.research[id] || 0
+    );
+
+  if (
+    level >= def.max
+  ) {
+    toast("Research is maxed.");
+    return;
+  }
+
+  const cost =
+    researchCost(def);
+
+  if (player.money < cost) {
+    toast("Not enough cash.");
+    return;
+  }
+
+  player.money -= cost;
+
+  player.research[id] =
+    level + 1;
+
+  player.stats.researchBought += 1;
+
+  logActivity(
+    "Research advanced: " +
+    def.name +
+    " level " +
+    number(level + 1) +
+    "."
+  );
+
+  savePlayer();
+
+  updateAll();
+}
+
+/* -----------------------------
+   Drone purchase
+   ----------------------------- */
+
+function buyDrone(id) {
+  const def =
+    drones.find(
+      item => item.id === id
+    );
+
+  if (!def) {
+    return;
+  }
+
+  const level =
+    Number(
+      player.drones[id] || 0
+    );
+
+  if (
+    level >= def.max
+  ) {
+    toast("Drone fleet is maxed.");
+    return;
+  }
+
+  const slots =
+    player.up.drone +
+    player.prestige;
+
+  const used =
+    player.drones.scout +
+    player.drones.miner +
+    player.drones.hauler;
+
+  if (
+    used >= slots
+  ) {
+    toast(
+      "Buy more Drone Bay levels first."
+    );
+    return;
+  }
+
+  const cost =
+    droneCost(def);
+
+  if (player.money < cost) {
+    toast("Not enough cash.");
+    return;
+  }
+
+  player.money -= cost;
+
+  player.drones[id] =
+    level + 1;
+
+  logActivity(
+    "Deployed " +
+    def.name +
+    " level " +
+    number(level + 1) +
+    "."
+  );
+
+  savePlayer();
+
+  updateAll();
+}
+
+/* -----------------------------
+   Depth crate
+   ----------------------------- */
+
+function openDepthCrate() {
+  const base =
+    100 +
+    player.depth * 100;
+
+  const reward =
+    Math.floor(
+      base *
+      (0.8 + Math.random() * 1.6)
+    );
+
+  player.money += reward;
+
+  player.lifetime += reward;
+
+  player.crates += 1;
+
+  player.stats.cratesOpened += 1;
+
+  if (
+    Math.random() <
+    0.20
+  ) {
+    player.prestige += 0;
+    player.rare += 1;
+
+    logActivity(
+      "Depth crate contained a rare bonus."
+    );
+  }
+
+  logActivity(
+    "Depth crate opened: +" +
+    money(reward)
+  );
+
+  toast(
+    "Depth crate: " +
+    money(reward)
+  );
+}
+
+/* -----------------------------
+   Daily reward date
+   ----------------------------- */
+
+function todayKey() {
+  const date =
+    new Date();
+
+  return [
+    date.getFullYear(),
+    String(
+      date.getMonth() + 1
+    ).padStart(2, "0"),
+    String(
+      date.getDate()
+    ).padStart(2, "0")
+  ].join("-");
+}
+
+/* -----------------------------
+   Daily reward
+   ----------------------------- */
+
+function claimDaily() {
+  const today =
+    todayKey();
+
+  if (
+    player.dailyClaimed ===
+    today
+  ) {
+    toast(
+      "Daily reward already claimed."
+    );
+    return;
+  }
+
+  const rewardIndex =
+    Math.min(
+      player.dailyStreak,
+      dailyRewards.length - 1
+    );
+
+  const reward =
+    dailyRewards[rewardIndex];
+
+  player.money += reward;
+
+  player.lifetime += reward;
+
+  player.dailyStreak += 1;
+
+  player.dailyClaimed =
+    today;
+
+  player.lastDaily =
+    today;
+
+  player.stats.dailyClaims += 1;
+
+  logActivity(
+    "Daily reward claimed: " +
+    money(reward)
+  );
+
+  toast(
+    "Daily reward: " +
+    money(reward)
+  );
+
+  savePlayer();
+
+  updateAll();
+}
+
+/* -----------------------------
+   Contract generation
+   ----------------------------- */
+
+function generateContract() {
+  const choices = [
+    {
+      type: "ore",
+      name: "Bulk Ore Order",
+      target:
+        Math.floor(
+          100 +
+          player.depth * 30
+        ),
+      reward:
+        Math.floor(
+          800 +
+          player.depth * 90
+        )
+    },
+    {
+      type: "hits",
+      name: "Mining Shift",
+      target:
+        Math.floor(
+          30 +
+          player.depth / 2
+        ),
+      reward:
+        Math.floor(
+          1000 +
+          player.depth * 80
+        )
+    },
+    {
+      type: "rare",
+      name: "Rare Materials Order",
+      target:
+        Math.max(
+          2,
+          Math.floor(
+            2 +
+            player.depth / 60
+          )
+        ),
+      reward:
+        Math.floor(
+          2500 +
+          player.depth * 150
+        )
+    }
+  ];
+
+  return choices[
+    Math.floor(
+      Math.random() *
+      choices.length
+    )
+  ];
+}
+
+/* -----------------------------
+   Contract state
+   ----------------------------- */
+
+function getContractProgress() {
+  const contract =
+    player.contractsData.active;
+
+  if (!contract) {
+    return 0;
+  }
+
+  if (contract.type === "ore") {
+    return player.totalOre -
+      contract.startValue;
+  }
+
+  if (contract.type === "hits") {
+    return player.hits -
+      contract.startValue;
+  }
+
+  if (contract.type === "rare") {
+    return player.rare -
+      contract.startValue;
+  }
+
+  return 0;
+}
+
+/* -----------------------------
+   Start contract
+   ----------------------------- */
+
+function startContract() {
+  if (
+    player.contractsData.active
+  ) {
+    toast(
+      "Finish your current contract first."
+    );
+    return;
+  }
+
+  const contract =
+    generateContract();
+
+  contract.startValue =
+    contract.type === "ore"
+      ? player.totalOre
+      : contract.type === "hits"
+        ? player.hits
+        : player.rare;
+
+  contract.startedAt =
+    Date.now();
+
+  player.contractsData.active =
+    contract;
+
+  logActivity(
+    "Contract accepted: " +
+    contract.name
+  );
+
+  savePlayer();
+
+  updateAll();
+}
+
+/* -----------------------------
+   Complete contract
+   ----------------------------- */
+
+function completeContract() {
+  const contract =
+    player.contractsData.active;
+
+  if (!contract) {
+    return;
+  }
+
+  if (
+    getContractProgress() <
+    contract.target
+  ) {
+    toast(
+      "Contract is not complete."
+    );
+    return;
+  }
+
+  player.money +=
+    contract.reward;
+
+  player.lifetime +=
+    contract.reward;
+
+  player.contracts += 1;
+
+  player.contractsData.completed += 1;
+
+  player.contractsData.active =
+    null;
+
+  logActivity(
+    "Contract completed: +" +
+    money(contract.reward)
+  );
+
+  toast(
+    "Contract completed!"
+  );
+
+  savePlayer();
+
+  updateAll();
+}
+
+/* -----------------------------
+   Achievement checking
+   ----------------------------- */
+
+function checkAchievements() {
+  achievements.forEach(
+    achievement => {
+      if (
+        player.achievements[
+          achievement.id
+        ]
+      ) {
+        return;
+      }
+
+      if (
+        achievement.check()
+      ) {
+        player.achievements[
+          achievement.id
+        ] = Date.now();
+
+        player.money += 250;
+
+        player.lifetime += 250;
+
+        logActivity(
+          "Achievement unlocked: " +
+          achievement.name
+        );
+
+        toast(
+          "Achievement unlocked!"
+        );
+      }
+    }
+  );
+}
+
+/* -----------------------------
+   Mission checking
+   ----------------------------- */
+
+function claimMission(id) {
+  const mission =
+    missions.find(
+      item => item.id === id
+    );
+
+  if (!mission) {
+    return;
+  }
+
+  if (
+    player.missions[id]
+  ) {
+    return;
+  }
+
+  const value =
+    Number(
+      mission.get() || 0
+    );
+
+  if (
+    value <
+    mission.target
+  ) {
+    toast(
+      "Mission is not complete."
+    );
+    return;
+  }
+
+  player.missions[id] =
+    Date.now();
+
+  player.money +=
+    mission.reward;
+
+  player.lifetime +=
+    mission.reward;
+
+  logActivity(
+    "Mission complete: " +
+    mission.name +
+    " +" +
+    money(mission.reward)
+  );
+
+  toast(
+    "Mission reward claimed."
+  );
+
+  savePlayer();
+
+  updateAll();
+}
+
+/* -----------------------------
+   Prestige
+   ----------------------------- */
+
+function prestigeCost() {
+  return Math.floor(
+    10000000 *
+    Math.pow(
+      4,
+      player.prestige
+    )
+  );
+}
+
+function prestige() {
+  const cost =
+    prestigeCost();
+
+  if (
+    player.depth < 500
+  ) {
+    toast(
+      "Reach 500m to prestige."
+    );
+    return;
+  }
+
+  if (
+    player.money < cost
+  ) {
+    toast(
+      "You need " +
+      money(cost) +
+      " to prestige."
+    );
+    return;
+  }
+
+  const confirmed =
+    confirm(
+      "Prestige resets cash, ore, upgrades, equipment and research, but keeps your account, achievements, and prestige bonuses. Continue?"
+    );
+
+  if (!confirmed) {
+    return;
+  }
+
+  const username =
+    player.username;
+
+  const password =
+    player.password;
+
+  const old =
+    player;
+
+  const next =
+    freshPlayer(
+      username,
+      password
+    );
+
+  next.prestige =
+    old.prestige + 1;
+
+  next.achievements =
+    old.achievements;
+
+  next.stats =
+    old.stats;
+
+  next.stats.upgradesBought = 0;
+  next.stats.equipmentBought = 0;
+  next.stats.researchBought = 0;
+
+  next.createdAt =
+    old.createdAt;
+
+  next.lastLogin =
+    Date.now();
+
+  player = next;
+
+  logActivity(
+    "Prestige complete. Prestige level " +
+    number(player.prestige) +
+    "."
+  );
+
+  savePlayer();
+
+  toast(
+    "Prestige complete!"
+  );
+
+  updateAll();
+}
+
+/* -----------------------------
+   Market refresh
+   ----------------------------- */
+
+function refreshMarket() {
+  const upgradeBoost =
+    player
+      ? player.up.market * 0.03
+      : 0;
+
+  marketMultiplier =
+    Math.max(
+      0.55,
+      Math.min(
+        1.65,
+        0.70 +
+        Math.random() * 0.65 +
+        upgradeBoost +
+        player.prestige * 0.02
+      )
+    );
+
+  if (player) {
+    player.lastMarketRefresh =
+      Date.now();
+  }
+
+  updateMarketDisplay();
+}
+
+/* -----------------------------
+   Market display
+   ----------------------------- */
+
+function updateMarketDisplay() {
+  const marketValue =
+    $("marketValue");
+
+  const trend =
+    $("marketTrend");
+
+  if (!marketValue || !trend) {
+    return;
+  }
+
+  marketValue.textContent =
+    decimal(
+      marketMultiplier,
+      2
+    ) + "x";
+
+  if (
+    marketMultiplier >= 1.15
+  ) {
+    trend.textContent =
+      "MARKET HIGH";
+    trend.className =
+      "greenText";
+  } else if (
+    marketMultiplier <= 0.85
+  ) {
+    trend.textContent =
+      "MARKET LOW";
+    trend.className =
+      "redText";
+  } else {
+    trend.textContent =
+      "MARKET NORMAL";
+    trend.className =
+      "goldText";
+  }
+}
+
+/* -----------------------------
+   Activity logging
+   ----------------------------- */
+
+function logActivity(message) {
+  if (!activityLog) {
+    return;
+  }
+
+  const line =
+    document.createElement("div");
+
+  line.textContent =
+    new Date().toLocaleTimeString() +
+    " — " +
+    message;
+
+  activityLog.prepend(line);
+
+  while (
+    activityLog.children.length >
+    80
+  ) {
+    activityLog.lastElementChild.remove();
+  }
+}
+
+/* -----------------------------
+   Toast
+   ----------------------------- */
+
+function toast(message) {
+  toastElement.textContent =
+    message;
+
+  toastElement.style.display =
+    "block";
+
+  clearTimeout(toastTimer);
+
+  toastTimer =
+    setTimeout(() => {
+      toastElement.style.display =
+        "none";
+    }, 1800);
+}
+
+/* -----------------------------
+   Duration formatting
+   ----------------------------- */
+
+function formatDuration(seconds) {
+  const s =
+    Math.max(
+      0,
+      Math.floor(seconds)
+    );
+
+  const days =
+    Math.floor(
+      s / 86400
+    );
+
+  const hours =
+    Math.floor(
+      (s % 86400) /
+      3600
+    );
+
+  const minutes =
+    Math.floor(
+      (s % 3600) /
+      60
+    );
+
+  const secs =
+    s % 60;
+
+  const parts = [];
+
+  if (days) {
+    parts.push(
+      days + "d"
+    );
+  }
+
+  if (
+    hours ||
+    days
+  ) {
+    parts.push(
+      hours + "h"
+    );
+  }
+
+  if (
+    minutes ||
+    hours ||
+    days
+  ) {
+    parts.push(
+      minutes + "m"
+    );
+  }
+
+  parts.push(
+    secs + "s"
+  );
+
+  return parts.join(" ");
+}
+
+/* -----------------------------
+   Update top stats
+   ----------------------------- */
+
+function updateTopStats() {
+  moneyTop.textContent =
+    number(player.money);
+
+  cash.textContent =
+    number(player.money);
+
+  ore.textContent =
+    number(player.ore);
+
+  power.textContent =
+    decimal(
+      basePower(),
+      1
+    );
+
+  autoRate.textContent =
+    decimal(
+      getAutoOrePerSecond(),
+      1
+    );
+
+  depth.textContent =
+    number(player.depth);
+
+  storage.textContent =
+    number(player.ore) +
+    " / " +
+    number(storageCapacity());
+
+  cashRate.textContent =
+    money(
+      getAutoOrePerSecond() *
+      valueMultiplier() *
+      marketMultiplier
+    ) +
+    "/s";
+
+  const required =
+    depthRequirement();
+
+  depthNeed.textContent =
+    number(required);
+
+  progress.textContent =
+    number(
+      Math.min(
+        player.ore,
+        required
+      )
+    );
+
+  depthBar.style.width =
+    Math.min(
+      100,
+      (
+        player.ore /
+        required
+      ) * 100
+    ) + "%";
+
+  who.textContent =
+    player.username;
+
+  sessionDays.textContent =
+    sessionDaysLeft(
+      getSession()
+    );
+}
+
+/* -----------------------------
+   Render upgrades
+   ----------------------------- */
+
+function renderUpgrades() {
+  upgradeList.innerHTML =
+    upgrades.map(
+      def => {
+        const level =
+          Number(
+            player.up[def.id] || 0
+          );
+
+        const cost =
+          upgradeCost(def);
+
+        const disabled =
+          player.money < cost;
+
+        return `
+          <div class="item">
+            <div class="panelRow">
+              <div>
+                <div class="itemTitle">
+                  ${def.name}
+                  <span class="badge">
+                    LV ${number(level)}
+                  </span>
+                </div>
+                <div class="itemDesc">
+                  ${def.desc}
+                </div>
+              </div>
+              <button
+                class="buyButton"
+                data-upgrade="${def.id}"
+                ${disabled ? "disabled" : ""}
+              >
+                ${money(cost)}
+              </button>
+            </div>
+          </div>
+        `;
+      }
+    ).join("");
+
+  $$("[data-upgrade]")
+    .forEach(
+      button => {
+        button.onclick =
+          () => buyUpgrade(
+            button.dataset.upgrade
+          );
+      }
+    );
+}
+
+/* -----------------------------
+   Render zones
+   ----------------------------- */
+
+function renderZones() {
+  zoneList.innerHTML =
+    zones.map(
+      (zone, index) => {
+        const unlocked =
+          player.depth >=
+          zone.depth;
+
+        const active =
+          player.zone === index;
+
+        return `
+          <div class="item">
+            <div class="panelRow">
+              <div>
+                <div class="itemTitle">
+                  ${zone.name}
+                  ${
+                    active
+                      ? '<span class="badge done">ACTIVE</span>'
+                      : ""
+                  }
+                </div>
+                <div class="itemDesc">
+                  ${zone.description}
+                  · ${number(zone.depth)}m
+                  · ${decimal(zone.multiplier,2)}x
+                </div>
+              </div>
+              <button
+                class="buyButton"
+                data-zone="${index}"
+                ${!unlocked ? "disabled" : ""}
+              >
+                ${active ? "ACTIVE" : "ENTER"}
+              </button>
+            </div>
+          </div>
+        `;
+      }
+    ).join("");
+
+  $$("[data-zone]")
+    .forEach(
+      button => {
+        button.onclick =
+          () => selectZone(
+            Number(
+              button.dataset.zone
+            )
+          );
+      }
+    );
+}
+
+/* -----------------------------
+   Render missions
+   ----------------------------- */
+
+function renderMissions() {
+  missionList.innerHTML =
+    missions.map(
+      mission => {
+        const claimed =
+          Boolean(
+            player.missions[
+              mission.id
+            ]
+          );
+
+        const value =
+          Number(
+            mission.get() || 0
+          );
+
+        const progressValue =
+          Math.min(
+            mission.target,
+            value
+          );
+
+        const ready =
+          !claimed &&
+          progressValue >=
+          mission.target;
+
+        return `
+          <div class="item">
+            <div class="panelRow">
+              <div>
+                <div class="itemTitle">
+                  ${mission.name}
+                  ${
+                    claimed
+                      ? '<span class="badge done">CLAIMED</span>'
+                      : ""
+                  }
+                </div>
+                <div class="itemDesc">
+                  ${mission.description}
+                </div>
+                <div class="progressText">
+                  ${number(progressValue)}
+                  /
+                  ${number(mission.target)}
+                </div>
+              </div>
+              <button
+                class="buyButton"
+                data-mission="${mission.id}"
+                ${!ready ? "disabled" : ""}
+              >
+                ${
+                  claimed
+                    ? "DONE"
+                    : money(mission.reward)
+                }
+              </button>
+            </div>
+          </div>
+        `;
+      }
+    ).join("");
+
+  $$("[data-mission]")
+    .forEach(
+      button => {
+        button.onclick =
+          () => claimMission(
+            button.dataset.mission
+          );
+      }
+    );
+}
+
+/* -----------------------------
+   Render achievements
+   ----------------------------- */
+
+function renderAchievements() {
+  achievementList.innerHTML =
+    achievements.map(
+      achievement => {
+        const done =
+          Boolean(
+            player.achievements[
+              achievement.id
+            ]
+          );
+
+        return `
+          <div class="item ${
+            done ? "success" : ""
+          }">
+            <div class="panelRow">
+              <div>
+                <div class="itemTitle">
+                  ${achievement.name}
+                </div>
+                <div class="itemDesc">
+                  ${achievement.description}
+                </div>
+              </div>
+              <span class="badge ${
+                done ? "done" : ""
+              }">
+                ${done ? "UNLOCKED" : "LOCKED"}
+              </span>
+            </div>
+          </div>
+        `;
+      }
+    ).join("");
+}
+
+/* -----------------------------
+   Render equipment
+   ----------------------------- */
+
+function renderEquipment() {
+  equipmentList.innerHTML =
+    equipment.map(
+      def => {
+        const level =
+          Number(
+            player.equipment[
+              def.id
+            ] || 0
+          );
+
+        const maxed =
+          level >= def.max;
+
+        const cost =
+          equipmentCost(def);
+
+        return `
+          <div class="item">
+            <div class="panelRow">
+              <div>
+                <div class="itemTitle">
+                  ${def.name}
+                  <span class="badge">
+                    ${number(level)}
+                    /
+                    ${number(def.max)}
+                  </span>
+                </div>
+                <div class="itemDesc">
+                  ${def.desc}
+                </div>
+              </div>
+              <button
+                class="buyButton"
+                data-equipment="${def.id}"
+                ${maxed || player.money < cost ? "disabled" : ""}
+              >
+                ${maxed ? "MAX" : money(cost)}
+              </button>
+            </div>
+          </div>
+        `;
+      }
+    ).join("");
+
+  $$("[data-equipment]")
+    .forEach(
+      button => {
+        button.onclick =
+          () => buyEquipment(
+            button.dataset.equipment
+          );
+      }
+    );
+}
+
+/* -----------------------------
+   Render research
+   ----------------------------- */
+
+function renderResearch() {
+  researchList.innerHTML =
+    research.map(
+      def => {
+        const level =
+          Number(
+            player.research[
+              def.id
+            ] || 0
+          );
+
+        const maxed =
+          level >= def.max;
+
+        const cost =
+          researchCost(def);
+
+        return `
+          <div class="item">
+            <div class="panelRow">
+              <div>
+                <div class="itemTitle">
+                  ${def.name}
+                  <span class="badge">
+                    ${number(level)}
+                    /
+                    ${number(def.max)}
+                  </span>
+                </div>
+                <div class="itemDesc">
+                  ${def.desc}
+                </div>
+              </div>
+              <button
+                class="buyButton"
+                data-research="${def.id}"
+                ${maxed || player.money < cost ? "disabled" : ""}
+              >
+                ${maxed ? "MAX" : money(cost)}
+              </button>
+            </div>
+          </div>
+        `;
+      }
+    ).join("");
+
+  $$("[data-research]")
+    .forEach(
+      button => {
+        button.onclick =
+          () => buyResearch(
+            button.dataset.research
+          );
+      }
+    );
+}
+
+/* -----------------------------
+   Render drones
+   ----------------------------- */
+
+function renderDrones() {
+  const slots =
+    player.up.drone +
+    player.prestige;
+
+  const used =
+    player.drones.scout +
+    player.drones.miner +
+    player.drones.hauler;
+
+  droneList.innerHTML =
+    `
+      <div class="notice">
+        Drone slots:
+        <b>${number(used)}</b>
+        /
+        <b>${number(slots)}</b>
+      </div>
+    ` +
+    drones.map(
+      def => {
+        const level =
+          Number(
+            player.drones[
+              def.id
+            ] || 0
+          );
+
+        const maxed =
+          level >= def.max;
+
+        const cost =
+          droneCost(def);
+
+        const noSlot =
+          used >= slots;
+
+        return `
+          <div class="item">
+            <div class="panelRow">
+              <div>
+                <div class="itemTitle">
+                  ${def.name}
+                  <span class="badge">
+                    ${number(level)}
+                  </span>
+                </div>
+                <div class="itemDesc">
+                  ${def.desc}
+                </div>
+              </div>
+              <button
+                class="buyButton"
+                data-drone="${def.id}"
+                ${
+                  maxed ||
+                  noSlot ||
+                  player.money < cost
+                    ? "disabled"
+                    : ""
+                }
+              >
+                ${
+                  maxed
+                    ? "MAX"
+                    : noSlot
+                      ? "NO SLOT"
+                      : money(cost)
+                }
+              </button>
+            </div>
+          </div>
+        `;
+      }
+    ).join("");
+
+  $$("[data-drone]")
+    .forEach(
+      button => {
+        button.onclick =
+          () => buyDrone(
+            button.dataset.drone
+          );
+      }
+    );
+}
+
+/* -----------------------------
+   Render contract
+   ----------------------------- */
+
+function renderContract() {
+  const active =
+    player.contractsData.active;
+
+  if (!active) {
+    contractPanel.innerHTML =
+      `
+        <div class="notice">
+          <b>No active contract.</b>
+          <div class="itemDesc">
+            Take a contract for an extra cash reward.
+          </div>
+          <button
+            id="startContractButton"
+            class="goldButton"
+          >
+            ACCEPT CONTRACT
+          </button>
+        </div>
+      `;
+
+    $("startContractButton")
+      .onclick =
+      startContract;
+
+    return;
+  }
+
+  const progressValue =
+    Math.min(
+      active.target,
+      getContractProgress()
+    );
+
+  const complete =
+    progressValue >=
+    active.target;
+
+  contractPanel.innerHTML =
+    `
+      <div class="item">
+        <div class="itemTitle">
+          ${active.name}
+        </div>
+        <div class="itemDesc">
+          ${active.type.toUpperCase()}
+          order
+        </div>
+        <div class="progressText">
+          ${number(progressValue)}
+          /
+          ${number(active.target)}
+        </div>
+        <div class="itemActions">
+          <span class="goldText">
+            Reward ${money(active.reward)}
+          </span>
+          <button
+            id="completeContractButton"
+            class="buyButton"
+            ${!complete ? "disabled" : ""}
+          >
+            COMPLETE
+          </button>
+        </div>
+      </div>
+    `;
+
+  $("completeContractButton")
+    .onclick =
+    completeContract;
+}
+
+/* -----------------------------
+   Render inventory
+   ----------------------------- */
+
+function renderInventory() {
+  inventoryList.innerHTML =
+    ores.map(
+      def => {
+        const amount =
+          Number(
+            player.inventory[
+              def.id
+            ] || 0
+          );
+
+        const total =
+          amount * def.value;
+
+        return `
+          <tr>
+            <td>${def.name}</td>
+            <td>${number(amount)}</td>
+            <td>${money(def.value)}</td>
+            <td>${money(total)}</td>
+            <td>${number(def.minDepth)}m</td>
+          </tr>
+        `;
+      }
+    ).join("");
+}
+
+/* -----------------------------
+   Render stats
+   ----------------------------- */
+
+function updateStats() {
+  $("statLifetime").textContent =
+    money(player.lifetime);
+
+  $("statOre").textContent =
+    number(player.totalOre);
+
+  $("statHits").textContent =
+    number(player.hits);
+
+  $("statRare").textContent =
+    number(player.rare);
+
+  $("statDepth").textContent =
+    number(player.depth) + "m";
+
+  $("statTime").textContent =
+    formatDuration(player.time);
+
+  $("statContracts").textContent =
+    number(player.contracts);
+
+  $("statCrates").textContent =
+    number(player.crates);
+
+  $("statPrestige").textContent =
+    number(player.prestige);
+
+  $("statCritical").textContent =
+    number(player.criticalHits);
+
+  $("statDiscoveries").textContent =
+    number(player.discoveries);
+
+  $("statBestStreak").textContent =
+    number(player.bestStreak);
+
+  $("statOffline").textContent =
+    formatDuration(
+      player.stats.offlineSeconds
+    );
+
+  $("statUpgrades").textContent =
+    number(
+      player.stats.upgradesBought
+    );
+
+  $("statResearch").textContent =
+    number(
+      player.stats.researchBought
+    );
+
+  $("statMarket").textContent =
+    number(
+      player.stats.marketSales
+    );
+}
+
+/* -----------------------------
+   Render market page
+   ----------------------------- */
+
+function renderMarket() {
+  updateMarketDisplay();
+
+  $("marketValueText").textContent =
+    decimal(
+      marketMultiplier,
+      2
+    ) + "x";
+
+  $("marketIncome").textContent =
+    money(
+      getAutoOrePerSecond() *
+      valueMultiplier() *
+      marketMultiplier
+    ) +
+    "/sec";
+
+  $("marketOreValue").textContent =
+    money(
+      valueMultiplier()
+    );
+
+  $("marketInventoryValue").textContent =
+    money(
+      totalInventoryValue()
+    );
+}
+
+/* -----------------------------
+   Render daily reward
+   ----------------------------- */
+
+function renderDaily() {
+  const today =
+    todayKey();
+
+  const claimed =
+    player.dailyClaimed ===
+    today;
+
+  const reward =
+    dailyRewards[
+      Math.min(
+        player.dailyStreak,
+        dailyRewards.length - 1
+      )
+    ];
+
+  $("dailyReward").textContent =
+    money(reward);
+
+  $("dailyStreak").textContent =
+    number(
+      player.dailyStreak
+    );
+
+  $("dailyButton").disabled =
+    claimed;
+
+  $("dailyButton").textContent =
+    claimed
+      ? "CLAIMED TODAY"
+      : "CLAIM DAILY REWARD";
+}
+
+/* -----------------------------
+   Render settings
+   ----------------------------- */
+
+function renderSettings() {
+  $("soundButton").textContent =
+    player.settings.sound
+      ? "ON"
+      : "OFF";
+
+  $("autosaveButton").textContent =
+    player.settings.autosave
+      ? "ON"
+      : "OFF";
+
+  $("motionButton").textContent =
+    player.settings.reducedMotion
+      ? "REDUCED"
+      : "FULL";
+
+  $("confirmButton").textContent =
+    player.settings.confirmReset
+      ? "ON"
+      : "OFF";
+
+  $("prestigeCost").textContent =
+    money(
+      prestigeCost()
+    );
+
+  $("sessionInfo").textContent =
+    "Automatic login active for " +
+    sessionDaysLeft(
+      getSession()
+    ) +
+    " more day(s).";
+}
+
+/* -----------------------------
+   Render leaderboard
+   ----------------------------- */
+
+function renderLeaderboard() {
+  const rows =
+    Object.values(database)
+      .map(record => {
+        const data =
+          record &&
+          record.data
+            ? record.data
+            : null;
+
+        if (!data) {
+          return null;
+        }
+
+        return {
+          username:
+            data.username,
+          lifetime:
+            Number(
+              data.lifetime || 0
+            ),
+          depth:
+            Number(
+              data.depth || 1
+            ),
+          prestige:
+            Number(
+              data.prestige || 0
+            )
+        };
+      })
+      .filter(Boolean)
+      .sort(
+        (a,b) =>
+          b.lifetime -
+          a.lifetime
+      )
+      .slice(0,10);
+
+  if (!rows.length) {
+    leaderboardList.innerHTML =
+      "<div class='notice'>No local players yet.</div>";
+    return;
+  }
+
+  leaderboardList.innerHTML =
+    rows.map(
+      (row, index) => `
+        <tr>
+          <td>#${index + 1}</td>
+          <td>${escapeHTML(row.username)}</td>
+          <td>${money(row.lifetime)}</td>
+          <td>${number(row.depth)}m</td>
+          <td>${number(row.prestige)}</td>
+        </tr>
+      `
+    ).join("");
+}
+
+/* -----------------------------
+   Escape display text
+   ----------------------------- */
+
+function escapeHTML(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+/* -----------------------------
+   Update all UI
+   ----------------------------- */
+
+function updateAll() {
+  if (!player) {
+    return;
+  }
+
+  checkAchievements();
+
+  updateTopStats();
+
+  renderUpgrades();
+
+  renderZones();
+
+  renderMissions();
+
+  renderAchievements();
+
+  renderEquipment();
+
+  renderResearch();
+
+  renderDrones();
+
+  renderContract();
+
+  renderInventory();
+
+  updateStats();
+
+  renderMarket();
+
+  renderDaily();
+
+  renderSettings();
+
+  renderLeaderboard();
+
+  $("currentZone").textContent =
+    getZone().name;
+
+  $("currentZoneMultiplier").textContent =
+    decimal(
+      getZone().multiplier,
+      2
+    ) + "x";
+
+  $("criticalChance").textContent =
+    decimal(
+      Math.min(
+        35,
+        3 +
+        player.research.luck *
+        0.5
+      ),
+      1
+    ) + "%";
+
+  $("rareChance").textContent =
+    decimal(
+      rareChance() * 100,
+      1
+    ) + "%";
+
+  $("prestigeBonus").textContent =
+    decimal(
+      player.prestige * 10,
+      0
+    ) + "%";
+
+  $("droneSlots").textContent =
+    number(
+      player.up.drone +
+      player.prestige
+    );
+}
+
+/* -----------------------------
+   Navigation
+   ----------------------------- */
+
+function activatePage(pageId) {
+  $$(".page").forEach(
+    page => {
+      page.classList.toggle(
+        "active",
+        page.id === pageId
+      );
+    }
+  );
+
+  $$(".navButton").forEach(
+    button => {
+      button.classList.toggle(
+        "active",
+        button.dataset.page ===
+        pageId
+      );
+    }
+  );
+}
+
+/* -----------------------------
+   Export save
+   ----------------------------- */
+
+function exportSave() {
+  if (!player) {
+    return;
+  }
+
+  savePlayer();
+
+  const payload = {
+    version: VERSION,
+    exportedAt: Date.now(),
+    account: player
+  };
+
+  const blob =
+    new Blob(
+      [
+        JSON.stringify(
+          payload,
+          null,
+          2
+        )
+      ],
+      {
+        type:
+          "application/json"
+      }
+    );
+
+  const url =
+    URL.createObjectURL(
+      blob
+    );
+
+  const anchor =
+    document.createElement("a");
+
+  anchor.href =
+    url;
+
+  anchor.download =
+    "deepcore-save.json";
+
+  document.body.appendChild(
+    anchor
+  );
+
+  anchor.click();
+
+  anchor.remove();
+
+  setTimeout(
+    () => URL.revokeObjectURL(url),
+    1000
+  );
+
+  toast(
+    "Save exported."
+  );
+}
+
+/* -----------------------------
+   Import save
+   ----------------------------- */
+
+function importSave() {
+  if (!player) {
+    return;
+  }
+
+  const raw =
+    prompt(
+      "Paste your DEEPCORE save JSON:"
+    );
+
+  if (!raw) {
+    return;
+  }
+
+  try {
+    const payload =
+      JSON.parse(raw);
+
+    if (
+      !payload ||
+      !payload.account
+    ) {
+      throw new Error(
+        "Invalid save"
+      );
+    }
+
+    const imported =
+      migratePlayer(
+        payload.account
+      );
+
+    imported.username =
+      player.username;
+
+    imported.password =
+      player.password;
+
+    player =
+      imported;
+
+    savePlayer();
+
+    toast(
+      "Save imported."
+    );
+
+    logActivity(
+      "Save data imported."
+    );
+
+    updateAll();
+  } catch (error) {
+    toast(
+      "Invalid save file."
+    );
+  }
+}
+
+/* -----------------------------
+   Reset progression
+   ----------------------------- */
+
+function resetProgress() {
+  if (!player) {
+    return;
+  }
+
+  if (
+    player.settings.confirmReset
+  ) {
+    const confirmed =
+      confirm(
+        "Reset all progression for this account?"
+      );
+
+    if (!confirmed) {
+      return;
+    }
+  }
+
+  const username =
+    player.username;
+
+  const password =
+    player.password;
+
+  player =
+    freshPlayer(
+      username,
+      password
+    );
+
+  savePlayer();
+
+  logActivity(
+    "Progression reset."
+  );
+
+  toast(
+    "Progression reset."
+  );
+
+  updateAll();
+}
+
+/* -----------------------------
+   Toggle sound
+   ----------------------------- */
+
+function toggleSound() {
+  player.settings.sound =
+    !player.settings.sound;
+
+  savePlayer();
+
+  updateAll();
+}
+
+/* -----------------------------
+   Toggle autosave
+   ----------------------------- */
+
+function toggleAutosave() {
+  player.settings.autosave =
+    !player.settings.autosave;
+
+  savePlayer();
+
+  updateAll();
+}
+
+/* -----------------------------
+   Toggle reduced motion
+   ----------------------------- */
+
+function toggleMotion() {
+  player.settings.reducedMotion =
+    !player.settings.reducedMotion;
+
+  savePlayer();
+
+  updateAll();
+}
+
+/* -----------------------------
+   Toggle reset confirmation
+   ----------------------------- */
+
+function toggleConfirmation() {
+  player.settings.confirmReset =
+    !player.settings.confirmReset;
+
+  savePlayer();
+
+  updateAll();
+}
+
+/* -----------------------------
+   Main simulation tick
+   ----------------------------- */
+
+function tick() {
+  if (!player) {
+    return;
+  }
+
+  const now =
+    Date.now();
+
+  let delta =
+    (
+      now -
+      lastTick
+    ) / 1000;
+
+  delta =
+    Math.max(
+      0,
+      Math.min(
+        delta,
+        5
+      )
+    );
+
+  lastTick =
+    now;
+
+  player.time +=
+    delta;
+
+  const auto =
+    getAutoOrePerSecond();
+
+  if (auto > 0) {
+    const amount =
+      Math.min(
+        auto * delta,
+        Math.max(
+          0,
+          storageCapacity() -
+          player.ore
+        )
+      );
+
+    if (amount > 0) {
+      distributeOre(
+        amount,
+        false
+      );
+
+      const cashGenerated =
+        amount *
+        valueMultiplier() *
+        marketMultiplier;
+
+      player.money +=
+        cashGenerated;
+
+      player.lifetime +=
+        cashGenerated;
+    }
+  }
+
+  if (
+    player.streak > 0
+  ) {
+    player.streak =
+      Math.max(
+        0,
+        player.streak -
+        delta *
+        (
+          0.10 /
+          (
+            1 +
+            player.equipment.boots *
+            0.05
+          )
+        )
+      );
+  }
+
+  if (
+    player.settings.autosave &&
+    now - lastSave > 5000
+  ) {
+    savePlayer();
+  }
+
+  updateTopStats();
+
+  renderMarket();
+
+  renderDaily();
+
+  renderContract();
+}
+
+/* -----------------------------
+   Start loops
+   ----------------------------- */
+
+function startLoops() {
+  stopLoops();
+
+  lastTick =
+    Date.now();
+
+  marketTimer =
+    setInterval(
+      refreshMarket,
+      30000
+    );
+
+  autoSaveTimer =
+    setInterval(
+      () => {
+        if (
+          player &&
+          player.settings.autosave
+        ) {
+          savePlayer();
+        }
+      },
+      5000
+    );
+
+  window.gameTick =
+    setInterval(
+      tick,
+      1000
+    );
+}
+
+/* -----------------------------
+   Stop loops
+   ----------------------------- */
+
+function stopLoops() {
+  if (marketTimer) {
+    clearInterval(
+      marketTimer
+    );
+    marketTimer = null;
+  }
+
+  if (autoSaveTimer) {
+    clearInterval(
+      autoSaveTimer
+    );
+    autoSaveTimer = null;
+  }
+
+  if (window.gameTick) {
+    clearInterval(
+      window.gameTick
+    );
+    window.gameTick = null;
+  }
+}
+
+/* -----------------------------
+   Bind navigation
+   ----------------------------- */
+
+$$(".navButton")
+  .forEach(
+    button => {
+      button.onclick =
+        () => activatePage(
+          button.dataset.page
+        );
+    }
+  );
+
+/* -----------------------------
+   Bind auth
+   ----------------------------- */
+
+loginButton.onclick =
+  login;
+
+createButton.onclick =
+  createAccount;
+
+/* -----------------------------
+   Bind mining controls
+   ----------------------------- */
+
+$("mineButton").onclick =
+  mineOnce;
+
+$("sellButton").onclick =
+  () => sellAll(false);
+
+$("marketSellButton").onclick =
+  () => sellAll(true);
+
+$("descendButton").onclick =
+  descend;
+
+/* -----------------------------
+   Bind settings
+   ----------------------------- */
+
+$("soundButton").onclick =
+  toggleSound;
+
+$("autosaveButton").onclick =
+  toggleAutosave;
+
+$("motionButton").onclick =
+  toggleMotion;
+
+$("confirmButton").onclick =
+  toggleConfirmation;
+
+$("exportButton").onclick =
+  exportSave;
+
+$("importButton").onclick =
+  importSave;
+
+$("resetButton").onclick =
+  resetProgress;
+
+$("prestigeButton").onclick =
+  prestige;
+
+$("dailyButton").onclick =
+  claimDaily;
+
+$("logoutButton").onclick =
+  logout;
+
+/* -----------------------------
+   Keyboard controls
+   ----------------------------- */
+
+document.addEventListener(
+  "keydown",
+  event => {
+    if (
+      !player
+    ) {
+      return;
+    }
+
+    if (
+      event.code ===
+      "Space"
+    ) {
+      const tag =
+        document.activeElement
+          ? document.activeElement.tagName
+          : "";
+
+      if (
+        tag === "INPUT" ||
+        tag === "TEXTAREA"
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+
+      mineOnce();
+    }
+
+    if (
+      event.key ===
+      "Enter" &&
+      document.activeElement ===
+      passwordInput
+    ) {
+      login();
+    }
+  }
+);
+
+/* -----------------------------
+   Enter key on username
+   ----------------------------- */
+
+usernameInput.addEventListener(
+  "keydown",
+  event => {
+    if (
+      event.key ===
+      "Enter"
+    ) {
+      passwordInput.focus();
+    }
+  }
+);
+
+/* -----------------------------
+   Enter key on password
+   ----------------------------- */
+
+passwordInput.addEventListener(
+  "keydown",
+  event => {
+    if (
+      event.key ===
+      "Enter"
+    ) {
+      login();
+    }
+  }
+);
+
+/* -----------------------------
+   Before unload
+   ----------------------------- */
+
+window.addEventListener(
+  "beforeunload",
+  () => {
+    if (player) {
+      savePlayer();
+    }
+  }
+);
+
+/* -----------------------------
+   Visibility handling
+   ----------------------------- */
+
+document.addEventListener(
+  "visibilitychange",
+  () => {
+    if (!player) {
+      return;
+    }
+
+    if (
+      document.hidden
+    ) {
+      savePlayer();
+      return;
+    }
+
+    processOfflineEarnings();
+
+    lastTick =
+      Date.now();
+
+    updateAll();
+  }
+);
+
+
+/* -----------------------------
+   Extra display synchronization
+   ----------------------------- */
+
+function updateExtraDisplays() {
+  if (!player) {
+    return;
+  }
+
+  const streakElement =
+    $("streakDisplay");
+
+  if (streakElement) {
+    streakElement.textContent =
+      number(
+        Math.floor(
+          player.streak
+        )
+      );
+  }
+
+  const machineRate =
+    $("machineRate");
+
+  if (machineRate) {
+    machineRate.textContent =
+      decimal(
+        getAutoOrePerSecond(),
+        1
+      );
+  }
+
+  const eventText =
+    $("eventPanel");
+
+  if (eventText) {
+    eventText.innerHTML =
+      "Depth " +
+      number(player.depth) +
+      "m · " +
+      "Rare chance " +
+      decimal(
+        rareChance() * 100,
+        1
+      ) +
+      "% · " +
+      "Market " +
+      decimal(
+        marketMultiplier,
+        2
+      ) +
+      "x";
+  }
+}
+
+const originalUpdateAll =
+  updateAll;
+
+updateAll =
+  function() {
+    originalUpdateAll();
+    updateExtraDisplays();
+  };
+
+
+/* -----------------------------
+   Previous DEEPCORE compatibility
+   ----------------------------- */
+
+function migratePreviousV4Account() {
+  const oldKey = "DEEPCORE_V4";
+
+  try {
+    const raw = localStorage.getItem(oldKey);
+
+    if (!raw) {
+      return;
+    }
+
+    const oldDb = JSON.parse(raw);
+
+    if (!oldDb || typeof oldDb !== "object") {
+      return;
+    }
+
+    Object.keys(oldDb).forEach(
+      username => {
+        const record =
+          oldDb[username];
+
+        if (
+          !record ||
+          typeof record !== "object"
+        ) {
+          return;
+        }
+
+        if (
+          record.data &&
+          typeof record.data === "object"
+        ) {
+          const data =
+            migratePlayer(
+              record.data
+            );
+
+          data.username =
+            username;
+
+          data.password =
+            record.password ||
+            data.password ||
+            "";
+
+          if (
+            !database[username]
+          ) {
+            database[username] = {
+              password:
+                data.password,
+              data
+            };
+          }
+        }
+      }
+    );
+
+    saveDatabase();
+  } catch (error) {
+    console.warn(
+      "Old DEEPCORE migration skipped.",
+      error
+    );
+  }
+}
+
+migratePreviousV4Account();
+
+/* -----------------------------
+   Startup migration
+   ----------------------------- */
+
+migrateLegacyDatabase();
+
+try {
+  database = loadDatabase();
+} catch (error) {
+  console.warn(error);
+}
+
+/* -----------------------------
+   Startup market
+   ----------------------------- */
+
+marketMultiplier =
+  0.90 +
+  Math.random() *
+  0.20;
+
+/* -----------------------------
+   Startup authentication
+   ----------------------------- */
+
+tryAutomaticLogin();
+
+/* -----------------------------
+   Startup loops
+   ----------------------------- */
+
+startLoops();
+
+/* -----------------------------
+   Startup UI
+   ----------------------------- */
+
+if (!player) {
+  showAuth();
+}
+
+if (player) {
+  updateAll();
+}
+
 
 /* =========================================================
-   MINING
+   DEEPCORE SYSTEM INDEX
+   =========================================================
+   01. AUTHENTICATION
+   02. 30 DAY SESSION
+   03. LOCAL DATABASE
+   04. LEGACY V4 MIGRATION
+   05. OFFLINE EARNINGS
+   06. MINING ENGINE
+   07. ORE DISTRIBUTION
+   08. UPGRADES
+   09. EQUIPMENT
+   10. RESEARCH
+   11. DRONES
+   12. MINING ZONES
+   13. MARKET
+   14. MISSIONS
+   15. CONTRACTS
+   16. ACHIEVEMENTS
+   17. DAILY REWARDS
+   18. RANDOM EVENTS
+   19. DEPTH CRATES
+   20. PRESTIGE
+   21. INVENTORY
+   22. STATISTICS
+   23. LOCAL LEADERBOARD
+   24. SETTINGS
+   25. EXPORT / IMPORT
+   26. KEYBOARD CONTROLS
+   27. OFFLINE TAB HANDLING
+   28. AUTOSAVE
+   29. RESPONSIVE UI
+   30. SAVE SAFETY
    ========================================================= */
 
-function spawnParticle(x,y){
- if(player.settings.reducedEffects)return;
- const el=document.createElement("i");
- el.className="particle";
- el.style.left=x+"px";
- el.style.top=y+"px";
- el.style.setProperty("--x",(Math.random()*180-90)+"px");
- el.style.setProperty("--y",(Math.random()*160-80)+"px");
- $("mineView").appendChild(el);
- setTimeout(()=>el.remove(),750);
-}
-
-function floatingText(text){
- const el=document.createElement("div");
- el.className="float";
- el.textContent=text;
- el.style.left=(42+Math.random()*18)+"%";
- el.style.top=(40+Math.random()*15)+"%";
- $("mineView").appendChild(el);
- setTimeout(()=>el.remove(),850);
-}
-
-function playBeep(freq=260,duration=.045){
- if(!player?.settings.sound)return;
- try{
-  const C=window.AudioContext||window.webkitAudioContext;
-  if(!C)return;
-  const ctx=new C();
-  const osc=ctx.createOscillator();
-  const gain=ctx.createGain();
-  osc.frequency.value=freq;
-  gain.gain.value=.025;
-  osc.connect(gain);gain.connect(ctx.destination);
-  osc.start();
-  osc.stop(ctx.currentTime+duration);
- }catch(e){}
-}
-
-function mineOnce(){
- if(totalOwnedOre()>=getStorage()){
-  toast("Storage full — sell your ore.");
-  return;
- }
- let amount=getPower();
- let crit=Math.random()<(.035+(player.upgrades.laser||0)*.006);
- if(crit){
-  amount*=2;
-  player.critHits++;
-  floatingText("CRITICAL ×2");
-  activity("⚡ Critical mining hit!");
- }
- const ore=getOreForDepth();
- const actual=addOre(ore.id,amount,"manual");
- if(actual<=0){
-  toast("Storage full.");
-  return;
- }
- player.hits++;
- player.streak++;
- player.bestStreak=Math.max(player.bestStreak,player.streak);
- floatingText("+"+actual+" "+ore.name);
- playBeep(210+Math.random()*100,.05);
- $("pick").classList.add("hit");
- setTimeout(()=>$("pick").classList.remove("hit"),90);
- for(let i=0;i<6;i++)spawnParticle(50+Math.random()*20,45+Math.random()*15);
- if(Math.random()<getRareChance()*.35){
-  const rareBonus=Math.floor(orePrice(ore)*3);
-  player.rareFinds++;
-  addMoney(rareBonus,"◆ Rare vein found");
-  floatingText("RARE +"+money(rareBonus));
- }
- if(player.streak%25===0){
-  const streakBonus=player.streak*5;
-  addMoney(streakBonus,"🔥 Mining streak bonus");
- }
- refreshAll();
-}
-
-function processAuto(dt,offline=false){
- if(!player)return;
- const rate=getAutoRate();
- if(rate<=0)return;
- const amount=rate*dt;
- const ore=getOreForDepth();
- const actual=addOre(ore.id,amount,offline?"auto":"auto");
- if(actual<=0)return;
- if(!offline){
-  const cash=actual*orePrice(ore)*.025;
-  addMoney(cash);
- }
-}
-
-function calculateOfflineEarnings(){
- const now=Date.now();
- let seconds=Math.floor((now-player.lastSeen)/1000);
- if(seconds<15){
-  $("offlineReport").textContent="You were away for less than 15 seconds.";
-  return;
- }
- seconds=Math.min(seconds,MAX_OFFLINE_SECONDS);
- const rate=getAutoRate();
- if(rate<=0){
-  $("offlineReport").textContent="No automated machines were running. Buy an Automatic Drill to earn offline cash.";
-  player.lastSeen=now;
-  return;
- }
- const produced=rate*seconds;
- const averageOreValue=getZone().mult*getValueMultiplier()*market;
- const earned=Math.floor(produced*averageOreValue);
- player.money+=earned;
- player.lifetimeCash+=earned;
- player.stats.offlineCash+=earned;
- player.lifetimeOre+=Math.floor(produced);
- const hours=Math.floor(seconds/3600);
- const mins=Math.floor((seconds%3600)/60);
- $("offlineReport").innerHTML="<b>+"+money(earned)+" offline cash</b><br><span class='small'>"+
-  "Automated production ran for "+hours+"h "+mins+"m at about "+fmt(rate)+" ore/sec. "+
-  "Offline earnings are capped at 7 days.</span>";
- activity("🌙 Offline production: "+money(earned));
- player.lastSeen=now;
-}
-
-/* =========================================================
-   DEPTH / ZONES
-   ========================================================= */
-
-function descend(){
- const req=getDepthNeed();
- if(totalOwnedOre()<req){
-  toast("You need "+fmt(req-totalOwnedOre())+" more ore.");
-  return;
- }
- let consume=req;
- ORES.forEach(o=>{
-  if(consume<=0)return;
-  const take=Math.min(player.inventory[o.id]||0,consume);
-  player.inventory[o.id]-=take;
-  consume-=take;
- });
- player.ore=totalOwnedOre();
- player.depth++;
- player.deepestDepth=Math.max(player.deepestDepth,player.depth);
- player.researchPoints+=player.depth%5===0?1:0;
- if(player.depth%10===0){
-  openDepthCrate();
- }
- if(player.depth%25===0){
-  player.researchPoints++;
-  activity("🔬 Deep research point discovered!");
- }
- if(player.depth%50===0){
-  addMoney(player.depth*100,"Deep-depth bonus");
- }
- if(player.depth>=250)player.zone=5;
- else if(player.depth>=100)player.zone=Math.max(player.zone,4);
- else if(player.depth>=50)player.zone=Math.max(player.zone,3);
- else if(player.depth>=25)player.zone=Math.max(player.zone,2);
- else if(player.depth>=10)player.zone=Math.max(player.zone,1);
- updateMineBackground();
- refreshAll();
- savePlayer();
- toast("Reached depth "+player.depth+"m");
-}
-
-function selectZone(index){
- const z=ZONES[index];
- if(player.depth<z.min){
-  toast("Reach "+z.min+"m first.");
-  return;
- }
- player.zone=index;
- updateMineBackground();
- activity("Entered "+z.name+".");
- savePlayer();
- refreshAll();
-}
-
-function updateMineBackground(){
- const cls=["deep-1","deep-2","deep-3","deep-4","deep-5"];
- $("mineView").className="mine-view "+(cls[Math.min(player.zone,cls.length-1)]||"deep-1");
-}
-
-/* =========================================================
-   UPGRADES
-   ========================================================= */
-
-function buyUpgrade(id){
- const def=UPGRADES.find(x=>x.id===id);
- if(!def)return;
- const price=upgradeCost(def);
- if(player.money<price){
-  toast("Not enough cash.");
-  return;
- }
- player.money-=price;
- player.upgrades[id]++;
- activity("Purchased "+def.name+" Lv."+player.upgrades[id]);
- playBeep(420,.06);
- refreshAll();
- savePlayer();
-}
-
-function renderUpgrades(){
- $("upgradeList").innerHTML=UPGRADES.map(def=>{
-  const level=upgradeLevel(def.id);
-  const price=upgradeCost(def);
-  return `<div class="upgrade">
-   <div>
-    <div class="upgrade-name">${def.name} <span class="level">LV.${level}</span></div>
-    <div class="upgrade-desc">${def.desc}</div>
-   </div>
-   <button class="buy" data-upgrade="${def.id}" ${player.money<price?"
+</script>
+</body>
+</html>
